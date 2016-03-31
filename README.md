@@ -51,7 +51,7 @@ you change the size of the contents of the anchor or float elements.
 ## Related
 
 If you want interactive dropdown menus, check out the
-[react-menu-list](https://github.com/StreakYC/react-float-anchor) module that
+[react-menu-list](https://github.com/StreakYC/react-menu-list) module that
 is built with this!
 
 ## Types

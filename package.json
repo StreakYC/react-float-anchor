@@ -1,7 +1,7 @@
 {
   "name": "react-float-anchor",
   "version": "0.1.0",
-  "description": "React component for menu lists and submenus",
+  "description": "React component for positioning an element aligned to another",
   "main": "js/index.js",
   "scripts": {
     "prepublish": "babel -s inline -d js/ src/ && flow-copy-source -v src js",
