@@ -41,9 +41,11 @@ following props:
 * `float` must be null or a single React Element. This element will be placed
  in a container div which has `position:fixed` styling, is attached directly
  to the document body, and is positioned to line up with the anchor element.
-* `options` is an optional object of options to control how the float element
- is aligned to the anchor element. The options are the same as those supported
- by [contain-by-screen (version ^1.0)](https://github.com/AgentME/contain-by-screen#readme).
+* `options` is an optional object of options to control how the float element's
+ container is aligned to the anchor element. The options are the same as those
+ supported by [contain-by-screen (version ^1.0)](https://github.com/AgentME/contain-by-screen#readme).
+* `zIndex` is an optional number controlling the z-index CSS property of the
+ float element's container.
 
 The FloatAnchor component has a `reposition` method, which you should call if
 you change the size of the contents of the anchor or float elements.

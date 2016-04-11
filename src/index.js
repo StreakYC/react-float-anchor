@@ -14,9 +14,10 @@ export type FloatAnchorContext = {
 };
 
 type Props = {
-  options?: ?Options;
   anchor: React.Element;
   float?: ?React.Element;
+  options?: ?Options;
+  zIndex?: ?number|string;
 };
 export default class FloatAnchor extends React.Component {
   props: Props;
@@ -69,7 +70,11 @@ export default class FloatAnchor extends React.Component {
 
   componentWillReceiveProps(newProps: Props) {
     let forceReposition = !isEqual(newProps.options, this.props.options);
-    if (forceReposition || newProps.float !== this.props.float) {
+    if (
+      forceReposition ||
+      newProps.float !== this.props.float ||
+      newProps.zIndex !== this.props.zIndex
+    ) {
       this._updateFloat(newProps, forceReposition);
     }
   }
@@ -88,6 +93,7 @@ export default class FloatAnchor extends React.Component {
       if (!this._portal) {
         shouldReposition = true;
         const portal = this._portal = document.createElement('div');
+        portal.style.zIndex = props.zIndex;
         portal.style.position = 'fixed';
         document.body.appendChild(portal);
         this._portalRemoval.take(1).onValue(() => {

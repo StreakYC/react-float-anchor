@@ -25,6 +25,7 @@ describe('FloatAnchor', function() {
         float={
           <div className="floatedThing">blah</div>
         }
+        zIndex={1337}
       />,
       mountPoint
     ): any);
@@ -35,6 +36,10 @@ describe('FloatAnchor', function() {
 
     const float = document.body.querySelector('.floatedThing');
     assert.strictEqual(float.textContent, 'blah');
+
+    const floatContainer = float.parentElement;
+    if (!(floatContainer instanceof HTMLElement)) throw new Error('Failed to find container');
+    assert.strictEqual(floatContainer.style.zIndex, '1337');
 
     ReactDOM.unmountComponentAtNode(mountPoint);
 
