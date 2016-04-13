@@ -27,12 +27,15 @@ export default class FloatAnchor extends React.Component {
     float: PropTypes.element
   };
 
-  _portal: ?HTMLElement;
+  _portalEl: ?HTMLElement;
   _isRenderingFloat: boolean = false;
   _shouldRepositionOnFloatRender: boolean = false;
   _portalRemoval: Object = kefirBus();
   _unmount: Object = kefirBus();
   _repositionEvents: Object = kefirBus();
+
+  // The floated component. Exposed for test purposes.
+  portal: ?React.Component = null;
 
   // Context is used so that when a FloatAnchor has reposition() called on it,
   // all of its descendant FloatAnchor elements reposition too.
@@ -90,16 +93,17 @@ export default class FloatAnchor extends React.Component {
 
     if (float) {
       let shouldReposition = forceReposition;
-      if (!this._portal) {
+      if (!this._portalEl) {
         shouldReposition = true;
-        const portal = this._portal = document.createElement('div');
-        portal.style.zIndex = props.zIndex;
-        portal.style.position = 'fixed';
-        document.body.appendChild(portal);
+        const portalEl = this._portalEl = document.createElement('div');
+        portalEl.style.zIndex = props.zIndex;
+        portalEl.style.position = 'fixed';
+        document.body.appendChild(portalEl);
         this._portalRemoval.take(1).onValue(() => {
-          ReactDOM.unmountComponentAtNode(portal);
-          portal.remove();
-          this._portal = null;
+          this.portal = null;
+          ReactDOM.unmountComponentAtNode(portalEl);
+          portalEl.remove();
+          this._portalEl = null;
         });
         const el = findDOMNode(this);
         Kefir.merge([
@@ -114,10 +118,10 @@ export default class FloatAnchor extends React.Component {
       }
 
       this._isRenderingFloat = true;
-      (ReactDOM:any).unstable_renderSubtreeIntoContainer(
+      this.portal = (ReactDOM:any).unstable_renderSubtreeIntoContainer(
         this,
         float,
-        this._portal,
+        this._portalEl,
         () => {
           this._isRenderingFloat = false;
           if (this._shouldRepositionOnFloatRender || shouldReposition) {
@@ -127,7 +131,7 @@ export default class FloatAnchor extends React.Component {
         }
       );
     } else {
-      if (this._portal) {
+      if (this._portalEl) {
         this._portalRemoval.emit(null);
       }
     }
@@ -138,9 +142,9 @@ export default class FloatAnchor extends React.Component {
       this._shouldRepositionOnFloatRender = true;
       return;
     }
-    const portal = this._portal;
-    if (portal) {
-      containByScreen(portal, findDOMNode(this), this.props.options || {});
+    const portalEl = this._portalEl;
+    if (portalEl) {
+      containByScreen(portalEl, findDOMNode(this), this.props.options || {});
       this._repositionEvents.emit(null);
     }
   }

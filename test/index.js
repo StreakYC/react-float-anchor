@@ -41,6 +41,9 @@ describe('FloatAnchor', function() {
     if (!(floatContainer instanceof HTMLElement)) throw new Error('Failed to find container');
     assert.strictEqual(floatContainer.style.zIndex, '1337');
 
+    if (!root.portal) throw new Error('Missing portal property');
+    assert.strictEqual(ReactDOM.findDOMNode(root.portal), float);
+
     ReactDOM.unmountComponentAtNode(mountPoint);
 
     assert.equal(document.body.querySelector('.floatedThing'), null);

@@ -50,6 +50,11 @@ following props:
 The FloatAnchor component has a `reposition` method, which you should call if
 you change the size of the contents of the anchor or float elements.
 
+The FloatAnchor component has a `portal` property, which is the
+currently-mounted float element if present. This is exposed mainly for tests.
+If you find yourself wanting to use it in other contexts, try just putting a
+ref on the float element!
+
 ## Related
 
 If you want interactive dropdown menus, check out the
