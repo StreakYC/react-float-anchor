@@ -1,6 +1,6 @@
 /* @flow */
 
-import fromEventsCapture from './lib/fromEventsCapture';
+import fromEventsWithOptions from './lib/fromEventsWithOptions';
 import Kefir from 'kefir';
 import kefirBus from 'kefir-bus';
 import React, {PropTypes} from 'react';
@@ -108,7 +108,7 @@ export default class FloatAnchor extends React.Component {
         const el = findDOMNode(this);
         Kefir.merge([
           Kefir.fromEvents(window, 'resize'),
-          fromEventsCapture(window, 'scroll')
+          fromEventsWithOptions(window, 'scroll', {capture: true, passive: true})
             .filter(event => event.target.contains(el))
         ])
           .takeUntilBy(this._portalRemoval)
