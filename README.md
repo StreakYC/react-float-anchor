@@ -47,6 +47,15 @@ following props:
 * `zIndex` is an optional number controlling the z-index CSS property of the
  float element's container.
 
+FloatAnchor has the following static methods:
+
+* `parentNodes(node)` takes a DOM node, and returns an iterator that yields the
+ node and then each parentNode, unless the current node is a `float` element's
+ container div, then its corresponding `anchor` DOM node will be yielded next
+ instead. This is useful when you are listening to events from the entire page
+ and need to determine whether an event's target is logically contained by a
+ React component that has children that use FloatAnchor.
+
 The FloatAnchor component has a `reposition` method, which you should call if
 you change the size of the contents of the anchor or float elements.
 
@@ -54,6 +63,9 @@ The FloatAnchor component has a `portal` property, which is the
 currently-mounted float element if present. This is exposed mainly for tests.
 If you find yourself wanting to use it in other contexts, try just putting a
 ref on the float element!
+
+The container div of the `float` element has its `rfaAnchor` property set to
+be equal to the `anchor` DOM element.
 
 ## Related
 

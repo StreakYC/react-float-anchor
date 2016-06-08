@@ -56,6 +56,12 @@ export default class FloatAnchor extends React.Component {
     return this.context.floatanchor;
   }
 
+  static *parentNodes(node: Node) {
+    do {
+      yield node;
+    } while ((node = node.rfaAnchor || node.parentNode));
+  }
+
   componentDidMount() {
     this._updateFloat(this.props);
     const parentCtx = this._parentCtx();
@@ -95,17 +101,19 @@ export default class FloatAnchor extends React.Component {
       let shouldReposition = forceReposition;
       if (!this._portalEl) {
         shouldReposition = true;
+        const el = findDOMNode(this);
         const portalEl = this._portalEl = document.createElement('div');
         portalEl.style.zIndex = props.zIndex;
         portalEl.style.position = 'fixed';
         document.body.appendChild(portalEl);
+        (portalEl: any).rfaAnchor = el;
         this._portalRemoval.take(1).onValue(() => {
+          (portalEl: any).rfaAnchor = undefined;
           this.portal = null;
           ReactDOM.unmountComponentAtNode(portalEl);
           portalEl.remove();
           this._portalEl = null;
         });
-        const el = findDOMNode(this);
         Kefir.merge([
           Kefir.fromEvents(window, 'resize'),
           fromEventsWithOptions(window, 'scroll', {capture: true, passive: true})

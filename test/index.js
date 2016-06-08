@@ -33,9 +33,23 @@ describe('FloatAnchor', function() {
     const divs = TestUtils.scryRenderedDOMComponentsWithTag(root, 'div');
 
     assert.deepEqual(divs.map(div => div.textContent), ['foo']);
+    const foo = divs[0];
 
     const float = document.body.querySelector('.floatedThing');
+    const floatParent = float.parentNode;
     assert.strictEqual(float.textContent, 'blah');
+
+    assert(Symbol.iterator in FloatAnchor.parentNodes(float));
+    assert('next' in FloatAnchor.parentNodes(float));
+
+    const parentNodes = Array.from(FloatAnchor.parentNodes(float));
+    assert.strictEqual(parentNodes[0], float);
+    assert.strictEqual(parentNodes[1], floatParent);
+    assert.strictEqual(parentNodes[2], foo);
+    assert.strictEqual(parentNodes[3], mountPoint);
+    assert.strictEqual(parentNodes.length, 4);
+
+    assert.strictEqual((floatParent: any).rfaAnchor, foo);
 
     const floatContainer = float.parentElement;
     if (!(floatContainer instanceof HTMLElement)) throw new Error('Failed to find container');
@@ -47,5 +61,6 @@ describe('FloatAnchor', function() {
     ReactDOM.unmountComponentAtNode(mountPoint);
 
     assert.equal(document.body.querySelector('.floatedThing'), null);
+    assert.strictEqual((floatParent: any).rfaAnchor, undefined);
   }));
 });
