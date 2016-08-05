@@ -14,8 +14,8 @@ export type FloatAnchorContext = {
 };
 
 type Props = {
-  anchor: React.Element;
-  float?: ?React.Element;
+  anchor: React.Element<any>;
+  float?: ?React.Element<any>;
   options?: ?Options;
   zIndex?: ?number|string;
 };
@@ -35,7 +35,7 @@ export default class FloatAnchor extends React.Component {
   _repositionEvents: Object = kefirBus();
 
   // The floated component. Exposed for test purposes.
-  portal: ?React.Component = null;
+  portal: ?React.Component<any,any,any> = null;
 
   // Context is used so that when a FloatAnchor has reposition() called on it,
   // all of its descendant FloatAnchor elements reposition too.
@@ -103,7 +103,7 @@ export default class FloatAnchor extends React.Component {
         shouldReposition = true;
         const el = findDOMNode(this);
         const portalEl = this._portalEl = document.createElement('div');
-        portalEl.style.zIndex = props.zIndex;
+        portalEl.style.zIndex = String(props.zIndex);
         portalEl.style.position = 'fixed';
         document.body.appendChild(portalEl);
         (portalEl: any).rfaAnchor = el;
@@ -157,7 +157,7 @@ export default class FloatAnchor extends React.Component {
     }
   }
 
-  render(): React.Element {
+  render() {
     const {anchor} = this.props;
     return anchor;
   }
