@@ -13,6 +13,8 @@ export type FloatAnchorContext = {
   repositionEvents: Object;
 };
 
+export type {Options} from 'contain-by-screen';
+
 type Props = {
   anchor: React.Element<any>;
   float?: ?React.Element<any>;
