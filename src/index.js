@@ -3,6 +3,7 @@
 import fromEventsWithOptions from './lib/fromEventsWithOptions';
 import Kefir from 'kefir';
 import kefirBus from 'kefir-bus';
+import type {Bus} from 'kefir-bus';
 import React, {PropTypes} from 'react';
 import ReactDOM, {findDOMNode} from 'react-dom';
 import containByScreen from 'contain-by-screen';
@@ -32,9 +33,9 @@ export default class FloatAnchor extends React.Component {
   _portalEl: ?HTMLElement;
   _isRenderingFloat: boolean = false;
   _shouldRepositionOnFloatRender: boolean = false;
-  _portalRemoval: Object = kefirBus();
-  _unmount: Object = kefirBus();
-  _repositionEvents: Object = kefirBus();
+  _portalRemoval: Bus<null> = kefirBus();
+  _unmount: Bus<null> = kefirBus();
+  _repositionEvents: Bus<null> = kefirBus();
 
   // The floated component. Exposed for test purposes.
   portal: ?React.Component<any,any,any> = null;
