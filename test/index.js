@@ -56,6 +56,7 @@ describe('FloatAnchor', function() {
     assert.strictEqual(floatContainer.style.zIndex, '1337');
 
     if (!root.portal) throw new Error('Missing portal property');
+    //eslint-disable-next-line react/no-find-dom-node
     assert.strictEqual(ReactDOM.findDOMNode(root.portal), float);
 
     ReactDOM.unmountComponentAtNode(mountPoint);
