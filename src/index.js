@@ -91,6 +91,12 @@ export default class FloatAnchor extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (this._portalEl && prevProps.anchor !== this.props.anchor) {
+      (this._portalEl: any).rfaAnchor = findDOMNode(this);
+    }
+  }
+
   componentWillUnmount() {
     this._portalRemoval.emit(null);
     this._unmount.emit(null);

@@ -64,4 +64,68 @@ describe('FloatAnchor', function() {
     assert.equal(document.body.querySelector('.floatedThing'), null);
     assert.strictEqual((floatParent: any).rfaAnchor, undefined);
   }));
+
+  it('rfaAnchor updates if anchor element changes', function() {
+    this.slow();
+
+    const mountPoint = document.createElement('div');
+    const root: FloatAnchor = (ReactDOM.render(
+      <FloatAnchor
+        anchor={
+          <div>foo</div>
+        }
+        float={
+          <div className="floatedThing">blah</div>
+        }
+        zIndex={1337}
+      />,
+      mountPoint
+    ): any);
+
+    const divs = TestUtils.scryRenderedDOMComponentsWithTag(root, 'div');
+    assert.deepEqual(divs.map(div => div.textContent), ['foo']);
+    const foo = divs[0];
+
+    const float = document.body.querySelector('.floatedThing');
+    const floatParent = float.parentNode;
+
+    {
+      const parentNodes = Array.from(FloatAnchor.parentNodes(float));
+      assert.strictEqual(parentNodes[0], float);
+      assert.strictEqual(parentNodes[1], floatParent);
+      assert.strictEqual(parentNodes[2], foo);
+      assert.strictEqual(parentNodes[3], mountPoint);
+      assert.strictEqual(parentNodes.length, 4);
+    }
+
+    assert.strictEqual((floatParent: any).rfaAnchor, foo);
+
+    ReactDOM.render(
+      <FloatAnchor
+        anchor={
+          <p>bar</p>
+        }
+        float={
+          <div className="floatedThing">blah</div>
+        }
+        zIndex={1337}
+      />,
+      mountPoint
+    );
+
+    const ps = TestUtils.scryRenderedDOMComponentsWithTag(root, 'p');
+    assert.deepEqual(ps.map(div => div.textContent), ['bar']);
+    const bar = ps[0];
+
+    {
+      const parentNodes = Array.from(FloatAnchor.parentNodes(float));
+      assert.strictEqual(parentNodes[0], float);
+      assert.strictEqual(parentNodes[1], floatParent);
+      assert.strictEqual(parentNodes[2], bar);
+      assert.strictEqual(parentNodes[3], mountPoint);
+      assert.strictEqual(parentNodes.length, 4);
+    }
+
+    assert.strictEqual((floatParent: any).rfaAnchor, bar);
+  });
 });
