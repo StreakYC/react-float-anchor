@@ -75,7 +75,7 @@ is built with this!
 
 ## Types
 
-[Flow Type](https://flowtype.org/) declarations for this module are included!
+[Flow](https://flowtype.org/) type declarations for this module are included!
 As of Flow v0.22, you must add the following entries to your `.flowconfig`
 file's options section for them to work:
 
