@@ -10,7 +10,7 @@ import containByScreen from 'contain-by-screen';
 import type {Options} from 'contain-by-screen';
 import isEqual from 'lodash/isEqual';
 
-const requestAnimationFrame = window.requestAnimationFrame || (cb => setTimeout(cb, 0));
+const requestAnimationFrame = global.requestAnimationFrame || (cb => setTimeout(cb, 0));
 
 export type FloatAnchorContext = {
   repositionEvents: Object;
