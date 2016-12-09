@@ -10,6 +10,8 @@ import containByScreen from 'contain-by-screen';
 import type {Options} from 'contain-by-screen';
 import isEqual from 'lodash/isEqual';
 
+const requestAnimationFrame = window.requestAnimationFrame || (cb => setTimeout(cb, 0));
+
 export type FloatAnchorContext = {
   repositionEvents: Object;
 };
@@ -75,7 +77,7 @@ export default class FloatAnchor extends React.Component {
       this._repositionEvents.plug(parentCtx.repositionEvents);
     }
     // We need to reposition after the page has had its layout done.
-    window.requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
       this.reposition();
     });
   }
