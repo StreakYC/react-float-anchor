@@ -116,7 +116,9 @@ export default class FloatAnchor extends React.Component {
         const portalEl = this._portalEl = document.createElement('div');
         portalEl.style.zIndex = String(props.zIndex);
         portalEl.style.position = 'fixed';
-        document.body.appendChild(portalEl);
+        const target = document.body || document.documentElement;
+        if (!target) throw new Error('Could not find element to attach portal to');
+        target.appendChild(portalEl);
         (portalEl: any).rfaAnchor = el;
         this._portalRemoval.take(1).onValue(() => {
           (portalEl: any).rfaAnchor = undefined;

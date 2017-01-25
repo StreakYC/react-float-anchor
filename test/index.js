@@ -35,7 +35,8 @@ describe('FloatAnchor', function() {
     assert.deepEqual(divs.map(div => div.textContent), ['foo']);
     const foo = divs[0];
 
-    const float = document.body.querySelector('.floatedThing');
+    const float = document.querySelector('.floatedThing');
+    if (!float) throw new Error('should not happen');
     const floatParent = float.parentNode;
     assert.strictEqual(float.textContent, 'blah');
 
@@ -61,7 +62,7 @@ describe('FloatAnchor', function() {
 
     ReactDOM.unmountComponentAtNode(mountPoint);
 
-    assert.equal(document.body.querySelector('.floatedThing'), null);
+    assert.equal(document.querySelector('.floatedThing'), null);
     assert.strictEqual((floatParent: any).rfaAnchor, undefined);
   }));
 
@@ -86,7 +87,8 @@ describe('FloatAnchor', function() {
     assert.deepEqual(divs.map(div => div.textContent), ['foo']);
     const foo = divs[0];
 
-    const float = document.body.querySelector('.floatedThing');
+    const float = document.querySelector('.floatedThing');
+    if (!float) throw new Error('should not happen');
     const floatParent = float.parentNode;
 
     {
