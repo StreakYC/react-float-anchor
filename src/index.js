@@ -113,6 +113,7 @@ export default class FloatAnchor extends React.Component {
       if (!this._portalEl) {
         shouldReposition = true;
         const el = findDOMNode(this);
+        if (!el) throw new Error('ReactFloatAnchor missing element');
         const portalEl = this._portalEl = document.createElement('div');
         portalEl.style.zIndex = String(props.zIndex);
         portalEl.style.position = 'fixed';
@@ -165,7 +166,9 @@ export default class FloatAnchor extends React.Component {
     }
     const portalEl = this._portalEl;
     if (portalEl) {
-      containByScreen(portalEl, findDOMNode(this), this.props.options || {});
+      const el = findDOMNode(this);
+      if (!(el instanceof HTMLElement)) throw new Error('ReactFloatAnchor missing element');
+      containByScreen(portalEl, el, this.props.options || {});
       this._repositionEvents.emit(null);
     }
   }

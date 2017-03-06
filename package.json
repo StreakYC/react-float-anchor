@@ -40,11 +40,11 @@
     "babel-preset-stage-1": "^6.5.0",
     "babel-register": "^6.6.5",
     "babelify": "^7.2.0",
-    "browserify": "^13.0.0",
+    "browserify": "^14.1.0",
     "browserify-hmr": "^0.3.1",
     "eslint": "^3.4.0",
     "eslint-plugin-react": "^6.2.0",
-    "flow-bin": "^0.38.0",
+    "flow-bin": "^0.41.0",
     "flow-copy-source": "^1.0.1",
     "jsdom": "^9.4.2",
     "mocha": "^3.0.2",
@@ -52,7 +52,7 @@
     "react-addons-test-utils": "^0.14.7",
     "react-dom": "^0.14.7",
     "sinon": "^1.17.3",
-    "watchify": "^3.7.0"
+    "watchify": "^3.9.0"
   },
   "dependencies": {
     "event-listener-with-options": "^1.0.2",
