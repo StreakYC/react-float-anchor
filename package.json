@@ -55,12 +55,13 @@
     "watchify": "^3.9.0"
   },
   "dependencies": {
-    "event-listener-with-options": "^1.0.2",
     "babel-runtime": "^6.23.0",
     "contain-by-screen": "^1.0.4",
+    "event-listener-with-options": "^1.0.2",
     "kefir": "^3.5.1",
     "kefir-bus": "^2.2.0",
-    "lodash": "^4.6.1"
+    "lodash": "^4.6.1",
+    "prop-types": "^15.5.8"
   },
   "peerDependencies": {
     "react": "^0.14.9 || ^15.3.0",
