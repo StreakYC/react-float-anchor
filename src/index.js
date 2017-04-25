@@ -46,10 +46,10 @@ export default class FloatAnchor extends React.Component {
   // Context is used so that when a FloatAnchor has reposition() called on it,
   // all of its descendant FloatAnchor elements reposition too.
   static childContextTypes = {
-    floatanchor: React.PropTypes.object
+    floatanchor: PropTypes.object
   };
   static contextTypes = {
-    floatanchor: React.PropTypes.object
+    floatanchor: PropTypes.object
   };
   getChildContext(): Object {
     const floatanchor: FloatAnchorContext = {
