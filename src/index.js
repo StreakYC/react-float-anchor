@@ -126,7 +126,7 @@ export default class FloatAnchor extends React.Component {
           (portalEl: any).rfaAnchor = undefined;
           this.portal = null;
           ReactDOM.unmountComponentAtNode(portalEl);
-          portalEl.remove();
+          if (portalEl.parentElement) portalEl.parentElement.removeChild(portalEl);
           this._portalEl = null;
         });
         Kefir.merge([
