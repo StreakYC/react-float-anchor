@@ -3,13 +3,14 @@
 import './lib/testdom';
 import assert from 'assert';
 import sinon from 'sinon';
+const sinonTest = require('sinon-test')(sinon);
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 import FloatAnchor from '../src';
 
 describe('FloatAnchor', function() {
-  it('mounts', sinon.test(function() {
+  it('mounts', sinonTest(function() {
     this.slow();
     // TODO test resize and scroll handlers
     this.spy(window, 'addEventListener');
