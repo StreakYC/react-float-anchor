@@ -1,6 +1,5 @@
 /* @flow */
 
-import assert from 'assert';
 import sinon from 'sinon';
 const sinonTest = require('sinon-test')(sinon);
 import React from 'react';
@@ -32,38 +31,38 @@ test('mounts', sinonTest(function() {
 
   const divs = TestUtils.scryRenderedDOMComponentsWithTag(root, 'div');
 
-  assert.deepEqual(divs.map(div => div.textContent), ['foo']);
+  expect(divs.map(div => div.textContent)).toEqual(['foo']);
   const foo = divs[0];
 
   const float = document.querySelector('.floatedThing');
   if (!float) throw new Error('should not happen');
   const floatParent = float.parentNode;
-  assert.strictEqual(float.textContent, 'blah');
+  expect(float.textContent).toBe('blah');
 
-  assert(Symbol.iterator in FloatAnchor.parentNodes(float));
-  assert('next' in FloatAnchor.parentNodes(float));
+  expect(Symbol.iterator in FloatAnchor.parentNodes(float)).toBe(true);
+  expect('next' in FloatAnchor.parentNodes(float)).toBe(true);
 
   const parentNodes = Array.from(FloatAnchor.parentNodes(float));
-  assert.strictEqual(parentNodes[0], float);
-  assert.strictEqual(parentNodes[1], floatParent);
-  assert.strictEqual(parentNodes[2], foo);
-  assert.strictEqual(parentNodes[3], mountPoint);
-  assert.strictEqual(parentNodes.length, 4);
+  expect(parentNodes[0]).toBe(float);
+  expect(parentNodes[1]).toBe(floatParent);
+  expect(parentNodes[2]).toBe(foo);
+  expect(parentNodes[3]).toBe(mountPoint);
+  expect(parentNodes.length).toBe(4);
 
-  assert.strictEqual((floatParent: any).rfaAnchor, foo);
+  expect((floatParent: any).rfaAnchor).toBe(foo);
 
   const floatContainer = float.parentElement;
   if (!(floatContainer instanceof HTMLElement)) throw new Error('Failed to find container');
-  assert.strictEqual(floatContainer.style.zIndex, '1337');
+  expect(floatContainer.style.zIndex).toBe('1337');
 
   if (!root.portal) throw new Error('Missing portal property');
   //eslint-disable-next-line react/no-find-dom-node
-  assert.strictEqual(ReactDOM.findDOMNode(root.portal), float);
+  expect(ReactDOM.findDOMNode(root.portal)).toBe(float);
 
   ReactDOM.unmountComponentAtNode(mountPoint);
 
-  assert.equal(document.querySelector('.floatedThing'), null);
-  assert.strictEqual((floatParent: any).rfaAnchor, undefined);
+  expect(document.querySelector('.floatedThing')).toBe(null);
+  expect((floatParent: any).rfaAnchor).toBe(undefined);
 }));
 
 test('rfaAnchor updates if anchor element changes', () => {
@@ -82,7 +81,7 @@ test('rfaAnchor updates if anchor element changes', () => {
   ): any);
 
   const divs = TestUtils.scryRenderedDOMComponentsWithTag(root, 'div');
-  assert.deepEqual(divs.map(div => div.textContent), ['foo']);
+  expect(divs.map(div => div.textContent)).toEqual(['foo']);
   const foo = divs[0];
 
   const float = document.querySelector('.floatedThing');
@@ -91,14 +90,14 @@ test('rfaAnchor updates if anchor element changes', () => {
 
   {
     const parentNodes = Array.from(FloatAnchor.parentNodes(float));
-    assert.strictEqual(parentNodes[0], float);
-    assert.strictEqual(parentNodes[1], floatParent);
-    assert.strictEqual(parentNodes[2], foo);
-    assert.strictEqual(parentNodes[3], mountPoint);
-    assert.strictEqual(parentNodes.length, 4);
+    expect(parentNodes[0]).toBe(float);
+    expect(parentNodes[1]).toBe(floatParent);
+    expect(parentNodes[2]).toBe(foo);
+    expect(parentNodes[3]).toBe(mountPoint);
+    expect(parentNodes.length).toBe(4);
   }
 
-  assert.strictEqual((floatParent: any).rfaAnchor, foo);
+  expect((floatParent: any).rfaAnchor).toBe(foo);
 
   ReactDOM.render(
     <FloatAnchor
@@ -114,19 +113,19 @@ test('rfaAnchor updates if anchor element changes', () => {
   );
 
   const ps = TestUtils.scryRenderedDOMComponentsWithTag(root, 'p');
-  assert.deepEqual(ps.map(div => div.textContent), ['bar']);
+  expect(ps.map(div => div.textContent)).toEqual(['bar']);
   const bar = ps[0];
 
   {
     const parentNodes = Array.from(FloatAnchor.parentNodes(float));
-    assert.strictEqual(parentNodes[0], float);
-    assert.strictEqual(parentNodes[1], floatParent);
-    assert.strictEqual(parentNodes[2], bar);
-    assert.strictEqual(parentNodes[3], mountPoint);
-    assert.strictEqual(parentNodes.length, 4);
+    expect(parentNodes[0]).toBe(float);
+    expect(parentNodes[1]).toBe(floatParent);
+    expect(parentNodes[2]).toBe(bar);
+    expect(parentNodes[3]).toBe(mountPoint);
+    expect(parentNodes.length).toBe(4);
   }
 
-  assert.strictEqual((floatParent: any).rfaAnchor, bar);
+  expect((floatParent: any).rfaAnchor).toBe(bar);
 
   ReactDOM.unmountComponentAtNode(mountPoint);
 });
