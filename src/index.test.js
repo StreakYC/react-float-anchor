@@ -127,4 +127,60 @@ test('rfaAnchor updates if anchor element changes', () => {
   }
 
   assert.strictEqual((floatParent: any).rfaAnchor, bar);
+
+  ReactDOM.unmountComponentAtNode(mountPoint);
+});
+
+test('float can be added and removed', () => {
+  const mountPoint = document.createElement('div');
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={
+        <div>foo</div>
+      }
+      float={null}
+      zIndex={1337}
+    />,
+    mountPoint
+  );
+
+  expect(document.querySelector('.floatedThing')).toBeFalsy();
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={
+        <div>foo</div>
+      }
+      float={
+        <div className="floatedThing">blah</div>
+      }
+      zIndex={1337}
+    />,
+    mountPoint
+  );
+
+  const floatedThing = document.querySelector('.floatedThing');
+  if (!floatedThing) throw new Error('missing floatedThing');
+
+  const floatedThingParent = floatedThing.parentElement;
+  if (!floatedThingParent) throw new Error();
+
+  expect(document.contains(floatedThingParent)).toBe(true);
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={
+        <div>foo</div>
+      }
+      float={null}
+      zIndex={1337}
+    />,
+    mountPoint
+  );
+
+  expect(document.querySelector('.floatedThing')).toBeFalsy();
+  expect(document.contains(floatedThingParent)).toBe(false);
+
+  ReactDOM.unmountComponentAtNode(mountPoint);
 });
