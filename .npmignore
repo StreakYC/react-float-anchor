@@ -1,9 +1,9 @@
 *~
 .DS_Store
-/.eslint*
+.eslint*
 /node_modules
 npm-debug.log
 /src
-/test
 /example
-/flow-libs
+/flow-typed
+*.test.*
