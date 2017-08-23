@@ -54,7 +54,7 @@
     "react-addons-test-utils": "^0.14.8",
     "react-dom": "^0.14.9",
     "rimraf": "^2.6.1",
-    "sinon": "^2.3.7",
+    "sinon": "^3.2.1",
     "sinon-test": "^2.0.0",
     "watchify": "^3.9.0"
   },

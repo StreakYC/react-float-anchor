@@ -29,9 +29,10 @@ type Props = {
 };
 export default class FloatAnchor extends React.Component<Props> {
   static propTypes = {
-    options: PropTypes.object,
     anchor: PropTypes.element.isRequired,
-    float: PropTypes.element
+    float: PropTypes.element,
+    options: PropTypes.object,
+    zIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
   };
 
   _portalEl: ?HTMLElement;
