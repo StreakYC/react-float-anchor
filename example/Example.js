@@ -4,7 +4,7 @@
 import React from 'react';
 import FloatAnchor from '../src';
 
-export default class Example extends React.Component {
+export default class Example extends React.Component<*> {
   render() {
     return (
       <div className="main">

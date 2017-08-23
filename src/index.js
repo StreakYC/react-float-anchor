@@ -6,6 +6,7 @@ import Kefir from 'kefir';
 import kefirBus from 'kefir-bus';
 import type {Bus} from 'kefir-bus';
 import React from 'react';
+import type {Element as ReactElement} from 'react';
 import ReactDOM, {findDOMNode} from 'react-dom';
 import PropTypes from 'prop-types';
 import containByScreen from 'contain-by-screen';
@@ -21,13 +22,12 @@ export type FloatAnchorContext = {
 export type {Options} from 'contain-by-screen';
 
 type Props = {
-  anchor: React.Element<any>;
-  float?: ?React.Element<any>;
+  anchor: ReactElement<any>;
+  float?: ?ReactElement<any>;
   options?: ?Options;
   zIndex?: ?number|string;
 };
-export default class FloatAnchor extends React.Component {
-  props: Props;
+export default class FloatAnchor extends React.Component<Props> {
   static propTypes = {
     options: PropTypes.object,
     anchor: PropTypes.element.isRequired,
@@ -42,7 +42,7 @@ export default class FloatAnchor extends React.Component {
   _repositionEvents: Bus<null> = kefirBus();
 
   // The floated component. Exposed for test purposes.
-  portal: ?React.Component<any,any,any> = null;
+  portal: ?React.Component<any,any> = null;
 
   // Context is used so that when a FloatAnchor has reposition() called on it,
   // all of its descendant FloatAnchor elements reposition too.
