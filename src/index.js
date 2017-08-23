@@ -1,4 +1,5 @@
 /* @flow */
+/* eslint-disable react/no-find-dom-node */
 
 import fromEventsWithOptions from './lib/fromEventsWithOptions';
 import Kefir from 'kefir';
