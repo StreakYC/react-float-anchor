@@ -36,14 +36,9 @@ export default class FloatAnchor extends React.Component<Props> {
   };
 
   _portalEl: ?HTMLElement;
-  _isRenderingFloat: boolean = false;
-  _shouldRepositionOnFloatRender: boolean = false;
   _portalRemoval: Bus<null> = kefirBus();
   _unmount: Bus<null> = kefirBus();
   _repositionEvents: Bus<null> = kefirBus();
-
-  // The floated component. Exposed for test purposes.
-  portal: ?React.Component<any,any> = null;
 
   // Context is used so that when a FloatAnchor has reposition() called on it,
   // all of its descendant FloatAnchor elements reposition too.
@@ -70,8 +65,17 @@ export default class FloatAnchor extends React.Component<Props> {
     } while ((node = (node: any).rfaAnchor || (node: any).parentNode));
   }
 
+  constructor(props: Props) {
+    super(props);
+    if (props.float) {
+      this._portalEl = document.createElement('div');
+    } else {
+      this._portalEl = null;
+    }
+  }
+
   componentDidMount() {
-    this._updateFloat(this.props);
+    this._updateFloat();
     const parentCtx = this._parentCtx();
     if (parentCtx) {
       parentCtx.repositionEvents
@@ -86,19 +90,24 @@ export default class FloatAnchor extends React.Component<Props> {
   }
 
   componentWillReceiveProps(newProps: Props) {
-    let forceReposition = !isEqual(newProps.options, this.props.options);
-    if (
-      forceReposition ||
-      newProps.float !== this.props.float ||
-      newProps.zIndex !== this.props.zIndex
-    ) {
-      this._updateFloat(newProps, forceReposition);
+    if (newProps.float && !this._portalEl) {
+      this._portalEl = document.createElement('div');
     }
   }
 
   componentDidUpdate(prevProps: Props) {
     if (this._portalEl && prevProps.anchor !== this.props.anchor) {
       (this._portalEl: any).rfaAnchor = findDOMNode(this);
+    }
+
+    if (
+      prevProps.float !== this.props.float ||
+      prevProps.zIndex !== this.props.zIndex
+    ) {
+      this._updateFloat();
+      this.reposition();
+    } else if (!isEqual(prevProps.options, this.props.options)) {
+      this.reposition();
     }
   }
 
@@ -108,28 +117,26 @@ export default class FloatAnchor extends React.Component<Props> {
     this._repositionEvents.end();
   }
 
-  _updateFloat(props: Props, forceReposition: boolean=false) {
-    const {float} = props;
+  _updateFloat() {
+    const {float} = this.props;
 
     if (float) {
-      let shouldReposition = forceReposition;
-      if (!this._portalEl) {
-        shouldReposition = true;
+      if (!this._portalEl) throw new Error('Should not happen: portalEl not initialized');
+      const portalEl = this._portalEl;
+
+      portalEl.style.zIndex = String(this.props.zIndex);
+      portalEl.style.position = 'fixed';
+
+      if (!portalEl.parentElement) {
         const el = findDOMNode(this);
         if (!el) throw new Error('ReactFloatAnchor missing element');
-        const portalEl = this._portalEl = document.createElement('div');
-        portalEl.style.zIndex = String(props.zIndex);
-        portalEl.style.position = 'fixed';
         const target = document.body || document.documentElement;
         if (!target) throw new Error('Could not find element to attach portal to');
         target.appendChild(portalEl);
         (portalEl: any).rfaAnchor = el;
         this._portalRemoval.take(1).onValue(() => {
           (portalEl: any).rfaAnchor = undefined;
-          this.portal = null;
-          ReactDOM.unmountComponentAtNode(portalEl);
           if (portalEl.parentElement) portalEl.parentElement.removeChild(portalEl);
-          this._portalEl = null;
         });
         Kefir.merge([
           Kefir.fromEvents(window, 'resize'),
@@ -141,34 +148,16 @@ export default class FloatAnchor extends React.Component<Props> {
             this.reposition();
           });
       }
-
-      this._isRenderingFloat = true;
-      this.portal = (ReactDOM:any).unstable_renderSubtreeIntoContainer(
-        this,
-        float,
-        this._portalEl,
-        () => {
-          this._isRenderingFloat = false;
-          if (this._shouldRepositionOnFloatRender || shouldReposition) {
-            this._shouldRepositionOnFloatRender = false;
-            this.reposition();
-          }
-        }
-      );
     } else {
-      if (this._portalEl) {
+      if (this._portalEl && this._portalEl.parentElement) {
         this._portalRemoval.emit(null);
       }
     }
   }
 
   reposition() {
-    if (this._isRenderingFloat) {
-      this._shouldRepositionOnFloatRender = true;
-      return;
-    }
     const portalEl = this._portalEl;
-    if (portalEl) {
+    if (portalEl && portalEl.parentElement) {
       const el = findDOMNode(this);
       if (!(el instanceof HTMLElement)) throw new Error('ReactFloatAnchor missing element');
       containByScreen(portalEl, el, this.props.options || {});
@@ -177,7 +166,22 @@ export default class FloatAnchor extends React.Component<Props> {
   }
 
   render() {
-    const {anchor} = this.props;
-    return anchor;
+    const {anchor, float} = this.props;
+    let floatPortal = null;
+    if (float) {
+      const portalEl = this._portalEl;
+      if (!portalEl) throw new Error('Should not happen: portalEl not initialized');
+      floatPortal = (ReactDOM:any).createPortal(float, portalEl);
+    }
+
+    // Using this small trick instead of an array so anchor and floatPortal
+    // don't need keys. TODO Use <>...</> instead or whatever official fragment
+    // technique React adds in the future.
+    return (
+      <div>
+        {anchor}
+        {floatPortal}
+      </div>
+    ).props.children;
   }
 }

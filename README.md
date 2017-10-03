@@ -18,8 +18,8 @@ You can find its code in the `example` directory. The example may be compiled
 by running:
 
 ```
-npm install
-npm run example-build
+yarn
+yarn example-build
 ```
 
 You can build the example with live editing enabled (using
@@ -27,7 +27,7 @@ You can build the example with live editing enabled (using
 [browserify-hmr](https://github.com/AgentME/browserify-hmr)) by running:
 
 ```
-npm run example-watch
+yarn example-watch
 ```
 
 ## FloatAnchor
@@ -76,11 +76,4 @@ is built with this!
 ## Types
 
 [Flow](https://flowtype.org/) type declarations for this module are included!
-As of Flow v0.22, you must add the following entries to your `.flowconfig`
-file's options section for them to work:
-
-```
-[options]
-esproposal.class_static_fields=enable
-esproposal.class_instance_fields=enable
-```
+If you are using Flow, they won't require any configuration to use.

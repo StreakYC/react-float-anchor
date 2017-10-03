@@ -4,7 +4,7 @@ import sinon from 'sinon';
 const sinonTest = require('sinon-test')(sinon);
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 import FloatAnchor from '../src';
 
 window.requestAnimationFrame = function() {};
@@ -31,7 +31,7 @@ test('mounts', sinonTest(function() {
 
   const divs = TestUtils.scryRenderedDOMComponentsWithTag(root, 'div');
 
-  expect(divs.map(div => div.textContent)).toEqual(['foo']);
+  expect(divs.map(div => div.textContent)).toEqual(['foo', 'blah']);
   const foo = divs[0];
 
   const float = document.querySelector('.floatedThing');
@@ -55,10 +55,6 @@ test('mounts', sinonTest(function() {
   if (!(floatContainer instanceof HTMLElement)) throw new Error('Failed to find container');
   expect(floatContainer.style.zIndex).toBe('1337');
 
-  if (!root.portal) throw new Error('Missing portal property');
-  //eslint-disable-next-line react/no-find-dom-node
-  expect(ReactDOM.findDOMNode(root.portal)).toBe(float);
-
   ReactDOM.unmountComponentAtNode(mountPoint);
 
   expect(document.querySelector('.floatedThing')).toBe(null);
@@ -81,7 +77,7 @@ test('rfaAnchor updates if anchor element changes', () => {
   ): any);
 
   const divs = TestUtils.scryRenderedDOMComponentsWithTag(root, 'div');
-  expect(divs.map(div => div.textContent)).toEqual(['foo']);
+  expect(divs.map(div => div.textContent)).toEqual(['foo', 'blah']);
   const foo = divs[0];
 
   const float = document.querySelector('.floatedThing');
