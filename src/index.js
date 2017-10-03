@@ -157,7 +157,7 @@ export default class FloatAnchor extends React.Component<Props> {
 
   reposition() {
     const portalEl = this._portalEl;
-    if (portalEl) {
+    if (portalEl && portalEl.parentElement) {
       const el = findDOMNode(this);
       if (!(el instanceof HTMLElement)) throw new Error('ReactFloatAnchor missing element');
       containByScreen(portalEl, el, this.props.options || {});
