@@ -59,11 +59,6 @@ FloatAnchor has the following static methods:
 The FloatAnchor component has a `reposition` method, which you should call if
 you change the size of the contents of the anchor or float elements.
 
-The FloatAnchor component has a `portal` property, which is the
-currently-mounted float element if present. This is exposed mainly for tests.
-If you find yourself wanting to use it in other contexts, try just putting a
-ref on the float element!
-
 The container div of the `float` element has its `rfaAnchor` property set to
 be equal to the `anchor` DOM element.
 
