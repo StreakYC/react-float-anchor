@@ -173,9 +173,15 @@ export default class FloatAnchor extends React.Component<Props> {
       if (!portalEl) throw new Error('Should not happen: portalEl not initialized');
       floatPortal = (ReactDOM:any).createPortal(float, portalEl);
     }
-    return [
-      anchor,
-      floatPortal
-    ];
+
+    // Using this small trick instead of an array so anchor and floatPortal
+    // don't need keys. TODO Use <>...</> instead or whatever official fragment
+    // technique React adds in the future.
+    return (
+      <div>
+        {anchor}
+        {floatPortal}
+      </div>
+    ).props.children;
   }
 }
