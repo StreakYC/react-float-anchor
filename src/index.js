@@ -26,7 +26,7 @@ type Props = {
   float?: ?ReactElement<any>;
   options?: ?Options;
   zIndex?: ?number|string;
-  floatContainerClassName?: string;
+  floatContainerClassName?: ?string;
 };
 export default class FloatAnchor extends React.Component<Props> {
   static propTypes = {
