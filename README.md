@@ -46,6 +46,8 @@ following props:
  supported by [contain-by-screen (version ^1.0)](https://github.com/AgentME/contain-by-screen#readme).
 * `zIndex` is an optional number controlling the z-index CSS property of the
  float element's container.
+* `floatContainerClassName` is an optional string specifying a CSS class to
+ apply to the float element's container div.
 
 FloatAnchor has the following static methods:
 
