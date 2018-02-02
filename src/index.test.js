@@ -179,3 +179,26 @@ test('float can be added and removed', () => {
 
   ReactDOM.unmountComponentAtNode(mountPoint);
 });
+
+test('can add a (custom) class to the portal', () => {
+  TestUtils.renderIntoDocument(
+    <FloatAnchor
+      anchor={<div>foo</div>}
+      float={<div>bar</div>}
+      zIndex={1337}
+    />
+  );
+ 
+  expect(document.querySelector('.floating-portal')).toBeTruthy();
+
+  TestUtils.renderIntoDocument(
+    <FloatAnchor
+      className='my-floating-portal'
+      anchor={<div>foo</div>}
+      float={<div>bar</div>}
+      zIndex={1337}
+    />
+  );
+
+  expect(document.querySelector('.my-floating-portal')).toBeTruthy();
+});
