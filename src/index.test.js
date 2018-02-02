@@ -183,22 +183,12 @@ test('float can be added and removed', () => {
 test('can add a (custom) class to the portal', () => {
   TestUtils.renderIntoDocument(
     <FloatAnchor
-      anchor={<div>foo</div>}
-      float={<div>bar</div>}
-      zIndex={1337}
-    />
-  );
- 
-  expect(document.querySelector('.floating-portal')).toBeTruthy();
-
-  TestUtils.renderIntoDocument(
-    <FloatAnchor
-      className='my-floating-portal'
+      floatContainerClassName='my-floating-container'
       anchor={<div>foo</div>}
       float={<div>bar</div>}
       zIndex={1337}
     />
   );
 
-  expect(document.querySelector('.my-floating-portal')).toBeTruthy();
+  expect(document.querySelector('.my-floating-container')).toBeTruthy();
 });

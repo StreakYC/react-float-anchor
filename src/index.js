@@ -26,7 +26,7 @@ type Props = {
   float?: ?ReactElement<any>;
   options?: ?Options;
   zIndex?: ?number|string;
-  className?: string; 
+  floatContainerClassName?: string;
 };
 export default class FloatAnchor extends React.Component<Props> {
   static propTypes = {
@@ -34,7 +34,7 @@ export default class FloatAnchor extends React.Component<Props> {
     float: PropTypes.element,
     options: PropTypes.object,
     zIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    className: PropTypes.string
+    floatContainerClassName: PropTypes.string
   };
 
   _portalEl: ?HTMLElement;
@@ -71,7 +71,7 @@ export default class FloatAnchor extends React.Component<Props> {
     super(props);
     if (props.float) {
       this._portalEl = document.createElement('div');
-      this._portalEl.className = props.className || 'floating-portal';
+      this._portalEl.className = props.floatContainerClassName || '';
     } else {
       this._portalEl = null;
     }
@@ -95,6 +95,10 @@ export default class FloatAnchor extends React.Component<Props> {
   componentWillReceiveProps(newProps: Props) {
     if (newProps.float && !this._portalEl) {
       this._portalEl = document.createElement('div');
+    }
+
+    if (this._portalEl && newProps.floatContainerClassName !== this.props.floatContainerClassName) {
+      this._portalEl.className = newProps.floatContainerClassName || '';
     }
   }
 
