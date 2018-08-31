@@ -35,5 +35,11 @@ module.exports = {
     "no-whitespace-before-property": ["error"],
     "space-before-blocks": ["error", "always"],
     "keyword-spacing": ["error"]
-  }
+  },
+  "settings": {
+    "react": {
+      "version": "15.3",
+      "flowVersion": "0.80.0"
+    },
+  },
 };

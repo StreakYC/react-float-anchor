@@ -64,7 +64,7 @@ export default class FloatAnchor extends React.Component<Props> {
     return this.context.floatanchor;
   }
 
-  static *parentNodes(node: Node) {
+  static *parentNodes(node: Node): Iterator<Node> {
     do {
       yield (node: Node);
     } while ((node = (node: any).rfaAnchor || (node: any).parentNode));

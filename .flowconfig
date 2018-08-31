@@ -1,12 +1,10 @@
 [ignore]
 .*/node_modules/fbjs/.*
 .*/node_modules/.*/\(test\|lib\|example\|samplejson\)/.*\.json
+<PROJECT_ROOT>/js/.*
 
 [include]
 
 [libs]
 
 [options]
-esproposal.class_static_fields=enable
-esproposal.class_instance_fields=enable
-unsafe.enable_getters_and_setters=true
