@@ -12,4 +12,6 @@ export type Props = {
   floatContainerClassName?: string | null | undefined;
 };
 export default class FloatAnchor extends React.Component<Props> {
+  static parentNodes(node: Node): IterableIterator<Node>;
+  reposition(): void;
 }
