@@ -15,13 +15,13 @@ import isEqual from 'lodash/isEqual';
 
 const requestAnimationFrame = global.requestAnimationFrame || (cb => setTimeout(cb, 0));
 
-export type FloatAnchorContext = {
+type FloatAnchorContext = {
   repositionEvents: Object;
 };
 
 export type {Options} from 'contain-by-screen';
 
-type Props = {
+export type Props = {
   anchor: ReactElement<any>;
   float?: ?ReactElement<any>;
   options?: ?Options;
