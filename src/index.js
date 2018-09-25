@@ -92,19 +92,13 @@ export default class FloatAnchor extends React.Component<Props> {
     });
   }
 
-  componentWillReceiveProps(newProps: Props) {
-    if (newProps.float && !this._portalEl) {
-      this._portalEl = document.createElement('div');
-    }
-
-    if (this._portalEl && newProps.floatContainerClassName !== this.props.floatContainerClassName) {
-      this._portalEl.className = newProps.floatContainerClassName || '';
-    }
-  }
-
   componentDidUpdate(prevProps: Props) {
     if (this._portalEl && prevProps.anchor !== this.props.anchor) {
       (this._portalEl: any).rfaAnchor = findDOMNode(this);
+    }
+
+    if (this._portalEl && prevProps.floatContainerClassName !== this.props.floatContainerClassName) {
+      this._portalEl.className = this.props.floatContainerClassName || '';
     }
 
     if (
@@ -176,9 +170,12 @@ export default class FloatAnchor extends React.Component<Props> {
     const {anchor, float} = this.props;
     let floatPortal = null;
     if (float) {
+      if (!this._portalEl) {
+        this._portalEl = document.createElement('div');
+      }
+
       const portalEl = this._portalEl;
-      if (!portalEl) throw new Error('Should not happen: portalEl not initialized');
-      floatPortal = (ReactDOM:any).createPortal(float, portalEl);
+      floatPortal = ReactDOM.createPortal(float, portalEl);
     }
 
     // Using this small trick instead of an array so anchor and floatPortal
