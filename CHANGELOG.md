@@ -1,3 +1,8 @@
+## 2.2.0 (2018-09-24)
+
+* Added TypeScript type definitions.
+* Removed use of deprecated React method `componentWillReceiveProps`.
+
 ## 2.1.0 (2018-02-02)
 
 * Added floatContainerClassName prop [#3](https://github.com/StreakYC/react-float-anchor/pull/3)
