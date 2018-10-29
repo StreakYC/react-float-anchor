@@ -41,23 +41,23 @@
     "@babel/register": "^7.0.0",
     "@types/react": "^16.4.14",
     "babel-core": "^7.0.0-bridge.0",
-    "babel-eslint": "^9.0.0",
+    "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
     "babel-plugin-add-module-exports": "^1.0.0",
     "babelify": "^10.0.0",
     "browserify": "^16.2.2",
     "cross-env": "^5.0.1",
     "eslint": "^5.6.0",
-    "eslint-plugin-flowtype": "^2.37.0",
+    "eslint-plugin-flowtype": "^3.1.4",
     "eslint-plugin-react": "^7.4.0",
     "flow-bin": "^0.84.0",
     "flow-copy-source": "^2.0.2",
     "jest": "^23.6.0",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0",
     "rimraf": "^2.6.1",
-    "sinon": "^6.3.4",
-    "sinon-test": "^2.3.0",
+    "sinon": "^7.1.0",
+    "sinon-test": "^2.4.0",
     "typescript": "^3.0.3",
     "watchify": "^3.9.0"
   },
@@ -71,7 +71,7 @@
     "prop-types": "^15.6.0"
   },
   "peerDependencies": {
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0"
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0"
   }
 }
