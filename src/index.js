@@ -178,14 +178,11 @@ export default class FloatAnchor extends React.Component<Props> {
       floatPortal = createPortal(float, portalEl);
     }
 
-    // Using this small trick instead of an array so anchor and floatPortal
-    // don't need keys. TODO Use <>...</> instead or whatever official fragment
-    // technique React adds in the future.
-    return ((
-      <div>
+    return (
+      <>
         {anchor}
         {floatPortal}
-      </div>
-    ): any).props.children;
+      </>
+    );
   }
 }
