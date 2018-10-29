@@ -1,3 +1,7 @@
+## 2.2.1 (2018-10-29)
+
+* Fixed compatibility with [Flow](https://flow.org/) v0.84.
+
 ## 2.2.0 (2018-09-24)
 
 * Added TypeScript type definitions.
