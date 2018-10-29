@@ -7,7 +7,7 @@ import kefirBus from 'kefir-bus';
 import type {Bus} from 'kefir-bus';
 import React from 'react';
 import type {Element as ReactElement} from 'react';
-import ReactDOM, {findDOMNode} from 'react-dom';
+import {createPortal, findDOMNode} from 'react-dom';
 import PropTypes from 'prop-types';
 import containByScreen from 'contain-by-screen';
 import type {Options} from 'contain-by-screen';
@@ -175,7 +175,7 @@ export default class FloatAnchor extends React.Component<Props> {
       }
 
       const portalEl = this._portalEl;
-      floatPortal = ReactDOM.createPortal(float, portalEl);
+      floatPortal = createPortal(float, portalEl);
     }
 
     // Using this small trick instead of an array so anchor and floatPortal
