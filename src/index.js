@@ -6,7 +6,6 @@ import Kefir from 'kefir';
 import kefirBus from 'kefir-bus';
 import type {Bus} from 'kefir-bus';
 import React from 'react';
-import type {Element as ReactElement} from 'react';
 import {createPortal, findDOMNode} from 'react-dom';
 import PropTypes from 'prop-types';
 import containByScreen from 'contain-by-screen';
@@ -26,16 +25,16 @@ const FloatAnchorContext = React.createContext((null: ?FloatAnchorContextType));
 export type {Options} from 'contain-by-screen';
 
 export type Props = {
-  anchor: ReactElement<any>;
-  float?: ?ReactElement<any>;
+  anchor: (anchorRef: React$Ref<any>) => React$Node;
+  float?: ?React$Node;
   options?: ?Options;
   zIndex?: ?number|string;
   floatContainerClassName?: ?string;
 };
 export default class FloatAnchor extends React.Component<Props> {
   static propTypes = {
-    anchor: PropTypes.element.isRequired,
-    float: PropTypes.element,
+    anchor: PropTypes.func.isRequired,
+    float: PropTypes.node,
     options: PropTypes.object,
     zIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     floatContainerClassName: PropTypes.string
@@ -159,7 +158,7 @@ export default class FloatAnchor extends React.Component<Props> {
   render() {
     const {anchor, float} = this.props;
     let floatPortal = null;
-    if (float) {
+    if (float != null) {
       if (!this._portalEl) {
         this._portalEl = document.createElement('div');
       }
@@ -172,9 +171,10 @@ export default class FloatAnchor extends React.Component<Props> {
       );
     }
 
+    // TODO anchorRef handling
     return (
       <>
-        {anchor}
+        {anchor(React.createRef())}
         {floatPortal}
       </>
     );

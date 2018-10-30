@@ -29,12 +29,15 @@ yarn example-watch
 This module exports the `FloatAnchor` React component, which takes the
 following props:
 
-* `anchor` must be a single React Element. This element will be placed in the
- page where the `FloatAnchor` element was used, with no added wrapper elements
- around it.
-* `float` must be null or a single React Element. This element will be placed
- in a container div which has `position:fixed` styling, is attached directly
- to the document body, and is positioned to line up with the anchor element.
+* `anchor` must be a function that takes a React ref value ("anchorRef"), and
+ returns a React node. The anchorRef value must be passed as the `ref` prop to
+ an HTML element. The returned node will be placed in the page where the
+ `FloatAnchor` element was used, with no added wrapper elements around it.
+* `float` must be null, or a React node. If null, then FloatAnchor won't do
+ anything other than render `anchor` as-is. If non-null, `float` will be
+ rendered in a container div which has `position:fixed` styling, is attached
+ directly to the document body, and is positioned to line up with the anchorRef
+ element.
 * `options` is an optional object of options to control how the float element's
  container is aligned to the anchor element. The options are the same as those
  supported by [contain-by-screen (version ^1.0)](https://github.com/AgentME/contain-by-screen#readme).
@@ -47,7 +50,7 @@ FloatAnchor has the following static methods:
 
 * `parentNodes(node)` takes a DOM node, and returns an iterator that yields the
  node and then each parentNode, unless the current node is a `float` element's
- container div, then its corresponding `anchor` DOM node will be yielded next
+ container div, then its corresponding anchorRef DOM node will be yielded next
  instead. This is useful when you are listening to events from the entire page
  and need to determine whether an event's target is logically contained by a
  React component that has children that use FloatAnchor.
@@ -56,7 +59,7 @@ The FloatAnchor component has a `reposition` method, which you should call if
 you change the size of the contents of the anchor or float elements.
 
 The container div of the `float` element has its `rfaAnchor` property set to
-be equal to the `anchor` DOM element.
+be equal to the anchorRef DOM element.
 
 ## Related
 

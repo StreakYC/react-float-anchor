@@ -18,8 +18,8 @@ test('mounts', sinonTest(function() {
   const mountPoint = document.createElement('div');
   const root: FloatAnchor = (ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -65,8 +65,8 @@ test('rfaAnchor updates if anchor element changes', () => {
   const mountPoint = document.createElement('div');
   const root: FloatAnchor = (ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -97,8 +97,8 @@ test('rfaAnchor updates if anchor element changes', () => {
 
   ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <p>bar</p>
+      anchor={anchorRef =>
+        <p ref={anchorRef}>bar</p>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -131,8 +131,8 @@ test('float can be added and removed', () => {
 
   ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={null}
       zIndex={1337}
@@ -144,8 +144,8 @@ test('float can be added and removed', () => {
 
   ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -165,8 +165,8 @@ test('float can be added and removed', () => {
 
   ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={null}
       zIndex={1337}
@@ -184,8 +184,8 @@ test('can add a (custom) class to the portal', () => {
   TestUtils.renderIntoDocument(
     <FloatAnchor
       floatContainerClassName='my-floating-container'
-      anchor={<div>foo</div>}
-      float={<div>bar</div>}
+      anchor={anchorRef => <div ref={anchorRef}>foo</div>}
+      float={'abc'}
       zIndex={1337}
     />
   );
