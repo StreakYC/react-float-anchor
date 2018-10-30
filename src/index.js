@@ -20,7 +20,7 @@ type FloatAnchorContextType = {
 
 // Context is used so that when a FloatAnchor has reposition() called on it,
 // all of its descendant FloatAnchor elements reposition too.
-const FloatAnchorContext = React.createContext((null: ?FloatAnchorContextType));
+const FloatAnchorContext = React.createContext<?FloatAnchorContextType>(null);
 
 export type {Options} from 'contain-by-screen';
 
