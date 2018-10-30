@@ -15,9 +15,13 @@ import isEqual from 'lodash/isEqual';
 
 const requestAnimationFrame = global.requestAnimationFrame || (cb => setTimeout(cb, 0));
 
-type FloatAnchorContext = {
-  repositionEvents: Object;
+type FloatAnchorContextType = {
+  repositionEvents: Bus<null>;
 };
+
+// Context is used so that when a FloatAnchor has reposition() called on it,
+// all of its descendant FloatAnchor elements reposition too.
+const FloatAnchorContext = React.createContext((null: ?FloatAnchorContextType));
 
 export type {Options} from 'contain-by-screen';
 
@@ -37,29 +41,15 @@ export default class FloatAnchor extends React.Component<Props> {
     floatContainerClassName: PropTypes.string
   };
 
+  static contextType = FloatAnchorContext;
+
   _portalEl: ?HTMLElement;
   _portalRemoval: Bus<null> = kefirBus();
   _unmount: Bus<null> = kefirBus();
   _repositionEvents: Bus<null> = kefirBus();
-
-  // Context is used so that when a FloatAnchor has reposition() called on it,
-  // all of its descendant FloatAnchor elements reposition too.
-  static childContextTypes = {
-    floatanchor: PropTypes.object
+  _childContext: FloatAnchorContextType = {
+    repositionEvents: this._repositionEvents
   };
-  static contextTypes = {
-    floatanchor: PropTypes.object
-  };
-  getChildContext(): Object {
-    const floatanchor: FloatAnchorContext = {
-      repositionEvents: this._repositionEvents
-    };
-    return {floatanchor};
-  }
-
-  _parentCtx(): ?FloatAnchorContext {
-    return this.context.floatanchor;
-  }
 
   static *parentNodes(node: Node): Iterator<Node> {
     do {
@@ -79,7 +69,7 @@ export default class FloatAnchor extends React.Component<Props> {
 
   componentDidMount() {
     this._updateFloat();
-    const parentCtx = this._parentCtx();
+    const parentCtx: ?FloatAnchorContextType = this.context;
     if (parentCtx) {
       parentCtx.repositionEvents
         .takeUntilBy(this._unmount)
@@ -175,7 +165,11 @@ export default class FloatAnchor extends React.Component<Props> {
       }
 
       const portalEl = this._portalEl;
-      floatPortal = createPortal(float, portalEl);
+      floatPortal = (
+        <FloatAnchorContext.Provider value={this._childContext}>
+          {createPortal(float, portalEl)}
+        </FloatAnchorContext.Provider>
+      );
     }
 
     return (
