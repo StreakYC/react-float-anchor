@@ -12,7 +12,7 @@ import containByScreen from 'contain-by-screen';
 import type {Options} from 'contain-by-screen';
 import isEqual from 'lodash/isEqual';
 
-const requestAnimationFrame = global.requestAnimationFrame || (cb => setTimeout(cb, 0));
+const requestAnimationFrame = global.requestAnimationFrame || (cb => Promise.resolve().then(cb));
 
 type FloatAnchorContextType = {
   repositionEvents: Kefir.Observable<null>;
