@@ -16,7 +16,7 @@ import isEqual from 'lodash/isEqual';
 const requestAnimationFrame = global.requestAnimationFrame || (cb => setTimeout(cb, 0));
 
 type FloatAnchorContextType = {
-  repositionEvents: Bus<null>;
+  repositionEvents: Kefir.Observable<null>;
 };
 
 // Context is used so that when a FloatAnchor has reposition() called on it,
