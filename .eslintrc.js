@@ -20,7 +20,7 @@ module.exports = {
   "settings": {
     "react": {
       "version": "16.6",
-      "flowVersion": "0.84"
+      "flowVersion": "0.85"
     }
   },
   "rules": {
