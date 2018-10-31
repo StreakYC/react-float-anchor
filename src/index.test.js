@@ -5,6 +5,7 @@ const sinonTest = require('sinon-test')(sinon);
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-dom/test-utils';
+import renderer from 'react-test-renderer';
 import FloatAnchor from '../src';
 
 window.requestAnimationFrame = function() {};
@@ -191,4 +192,19 @@ test('can add a (custom) class to the portal', () => {
   );
 
   expect(document.querySelector('.my-floating-container')).toBeTruthy();
+});
+
+test('works with react-test-renderer without float', () => {
+  // Doesn't work in react-test-renderer when float prop is non-null, partly
+  // because https://github.com/facebook/react/issues/11565
+  const component = renderer.create(
+    <FloatAnchor
+      floatContainerClassName='my-floating-container'
+      anchor={anchorRef => <div ref={anchorRef}>foo</div>}
+      float={null}
+      zIndex={1337}
+    />
+  );
+  let tree = component.toJSON();
+  expect(tree).toMatchSnapshot();
 });

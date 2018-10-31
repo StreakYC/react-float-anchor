@@ -55,6 +55,7 @@
     "jest": "^23.6.0",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
+    "react-test-renderer": "^16.6.0",
     "rimraf": "^2.6.1",
     "sinon": "^7.1.0",
     "sinon-test": "^2.4.0",
