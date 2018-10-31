@@ -20,8 +20,11 @@ export default class Example extends React.Component<*> {
           <div>
             <FloatAnchor
               options={{position:'right', vAlign:'top', hAlign: 'left'}}
-              anchor={
-                <div style={{border:'1px dashed gray', display:'inline-block'}}>
+              anchor={anchorRef =>
+                <div
+                  style={{border:'1px dashed gray', display:'inline-block'}}
+                  ref={anchorRef}
+                >
                   Planets
                 </div>
               }
@@ -37,8 +40,8 @@ export default class Example extends React.Component<*> {
                   Neptune<br/>
                   <FloatAnchor
                     options={{position:'right', vAlign:'top', hAlign: 'left'}}
-                    anchor={
-                      <div>
+                    anchor={anchorRef =>
+                      <div ref={anchorRef}>
                         Dwarf Planets ►
                       </div>
                     }

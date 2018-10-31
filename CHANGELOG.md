@@ -1,3 +1,36 @@
+## 3.0.0 (Unreleased)
+
+### Breaking Changes
+* React v16.6.0+ is now required.
+* The `anchor` prop must be a function of anchorRef => React node now.
+
+FloatAnchor v2:
+
+```js
+<FloatAnchor
+  anchor={
+    <div>a</div>
+  }
+/>
+```
+
+FloatAnchor v3:
+
+```js
+<FloatAnchor
+  anchor={anchorRef =>
+    <div ref={anchorRef}>a</div>
+  }
+/>
+```
+
+### Improvements
+* Removed all usages of the deprecated method
+  [React.findDOMNode](https://reactjs.org/docs/react-dom.html#finddomnode).
+* No longer uses the legacy [Context API](https://reactjs.org/docs/context.html#legacy-api).
+* Both `anchor` and `float` props may now use any React node rather than only a
+  React element. (You can pass a string now.)
+
 ## 2.2.1 (2018-10-29)
 
 * Fixed compatibility with [Flow](https://flow.org/) v0.84.

@@ -5,6 +5,7 @@ const sinonTest = require('sinon-test')(sinon);
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-dom/test-utils';
+import renderer from 'react-test-renderer';
 import FloatAnchor from '../src';
 
 window.requestAnimationFrame = function() {};
@@ -18,8 +19,8 @@ test('mounts', sinonTest(function() {
   const mountPoint = document.createElement('div');
   const root: FloatAnchor = (ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -65,8 +66,8 @@ test('rfaAnchor updates if anchor element changes', () => {
   const mountPoint = document.createElement('div');
   const root: FloatAnchor = (ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -97,8 +98,8 @@ test('rfaAnchor updates if anchor element changes', () => {
 
   ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <p>bar</p>
+      anchor={anchorRef =>
+        <p ref={anchorRef}>bar</p>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -131,8 +132,8 @@ test('float can be added and removed', () => {
 
   ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={null}
       zIndex={1337}
@@ -144,8 +145,8 @@ test('float can be added and removed', () => {
 
   ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -165,8 +166,8 @@ test('float can be added and removed', () => {
 
   ReactDOM.render(
     <FloatAnchor
-      anchor={
-        <div>foo</div>
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo</div>
       }
       float={null}
       zIndex={1337}
@@ -184,11 +185,26 @@ test('can add a (custom) class to the portal', () => {
   TestUtils.renderIntoDocument(
     <FloatAnchor
       floatContainerClassName='my-floating-container'
-      anchor={<div>foo</div>}
-      float={<div>bar</div>}
+      anchor={anchorRef => <div ref={anchorRef}>foo</div>}
+      float={'abc'}
       zIndex={1337}
     />
   );
 
   expect(document.querySelector('.my-floating-container')).toBeTruthy();
+});
+
+test('works with react-test-renderer without float', () => {
+  // Doesn't work in react-test-renderer when float prop is non-null, partly
+  // because https://github.com/facebook/react/issues/11565
+  const component = renderer.create(
+    <FloatAnchor
+      floatContainerClassName='my-floating-container'
+      anchor={anchorRef => <div ref={anchorRef}>foo</div>}
+      float={null}
+      zIndex={1337}
+    />
+  );
+  let tree = component.toJSON();
+  expect(tree).toMatchSnapshot();
 });
