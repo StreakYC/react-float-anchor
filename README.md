@@ -1,7 +1,6 @@
 # react-float-anchor
 
-[![Circle CI](https://circleci.com/gh/StreakYC/react-float-anchor.svg?style=shield)](https://circleci.com/gh/StreakYC/react-float-anchor)
-[![npm version](https://badge.fury.io/js/react-float-anchor.svg)](https://badge.fury.io/js/react-float-anchor)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Macil/ud/blob/master/LICENSE.txt) [![npm version](https://badge.fury.io/js/react-float-anchor.svg)](https://badge.fury.io/js/react-float-anchor) [![Circle CI](https://circleci.com/gh/StreakYC/react-float-anchor.svg?style=shield)](https://circleci.com/gh/StreakYC/react-float-anchor)
 
 This is a React component for anchoring a fixed position element, such as a
 dropdown menu, to the edge of an element on the page. The fixed position
