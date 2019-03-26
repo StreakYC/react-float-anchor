@@ -90,7 +90,6 @@ export default class FloatAnchor extends React.Component<Props> {
       parentCtx.repositionEvents
         .takeUntilBy(this._unmount)
         .onValue(() => this.reposition());
-      this._repositionEvents.plug(parentCtx.repositionEvents);
     }
     // We need to reposition after the page has had its layout done.
     requestAnimationFrame(() => {
