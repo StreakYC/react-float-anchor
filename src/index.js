@@ -57,16 +57,6 @@ export default class FloatAnchor extends React.Component<Props> {
     } while ((node = (node: any).rfaAnchor || (node: any).parentNode));
   }
 
-  constructor(props: Props) {
-    super(props);
-    if (props.float) {
-      this._portalEl = document.createElement('div');
-      this._portalEl.className = props.floatContainerClassName || '';
-    } else {
-      this._portalEl = null;
-    }
-  }
-
   _setAnchorRef = (anchorRef: ?HTMLElement) => {
     this._anchorRef = anchorRef;
 
@@ -79,6 +69,19 @@ export default class FloatAnchor extends React.Component<Props> {
       }
     }
   };
+
+  _getOrCreatePortalEl(): HTMLElement {
+    let portalEl = this._portalEl;
+    if (portalEl) {
+      return portalEl;
+    }
+    portalEl = this._portalEl = document.createElement('div');
+    portalEl.className = this.props.floatContainerClassName || '';
+    portalEl.style.zIndex = String(this.props.zIndex);
+    portalEl.style.position = 'fixed';
+
+    return portalEl;
+  }
 
   componentDidMount() {
     this._updateFloat();
@@ -96,13 +99,18 @@ export default class FloatAnchor extends React.Component<Props> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this._portalEl && prevProps.floatContainerClassName !== this.props.floatContainerClassName) {
-      this._portalEl.className = this.props.floatContainerClassName || '';
+    const portalEl = this._portalEl;
+    if (portalEl) {
+      if (prevProps.floatContainerClassName !== this.props.floatContainerClassName) {
+        portalEl.className = this.props.floatContainerClassName || '';
+      }
+      if (prevProps.zIndex !== this.props.zIndex) {
+        portalEl.style.zIndex = String(this.props.zIndex);
+      }
     }
 
     if (
-      prevProps.float !== this.props.float ||
-      prevProps.zIndex !== this.props.zIndex
+      prevProps.float !== this.props.float
     ) {
       this._updateFloat();
       this.reposition();
@@ -123,9 +131,6 @@ export default class FloatAnchor extends React.Component<Props> {
 
     if (float) {
       if (!portalEl) throw new Error('Should not happen: portalEl not initialized');
-
-      portalEl.style.zIndex = String(this.props.zIndex);
-      portalEl.style.position = 'fixed';
 
       if (!portalEl.parentElement) {
         const anchorRef = this._anchorRef;
@@ -160,6 +165,8 @@ export default class FloatAnchor extends React.Component<Props> {
     const anchorRef = this._anchorRef;
     if (portalEl && portalEl.parentElement && anchorRef) {
       containByScreen(portalEl, anchorRef, this.props.options || {});
+
+      // Make any child FloatAnchors reposition
       this._repositionEvents.emit(null);
     }
   }
@@ -168,10 +175,7 @@ export default class FloatAnchor extends React.Component<Props> {
     const {anchor, float} = this.props;
     let floatPortal = null;
     if (float != null) {
-      let portalEl = this._portalEl;
-      if (!portalEl) {
-        portalEl = this._portalEl = document.createElement('div');
-      }
+      const portalEl = this._getOrCreatePortalEl();
       floatPortal = (
         <FloatAnchorContext.Provider value={this._childContext}>
           {createPortal(float, portalEl)}

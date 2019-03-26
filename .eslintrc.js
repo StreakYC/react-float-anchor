@@ -29,6 +29,8 @@ module.exports = {
 
     "react/no-unescaped-entities": ["off"],
 
+    "no-unused-vars": ["error", { "args": "none" }],
+
     "indent": ["error", 2],
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "single", "avoid-escape"],
