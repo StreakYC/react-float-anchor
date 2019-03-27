@@ -104,8 +104,10 @@ export default class FloatAnchor extends React.Component<Props> {
       parentCtx.repositionAsyncEvents
         .takeUntilBy(this._unmount)
         .onValue(() => {
-          this._childContext.repositionAsyncQueued = true;
-          this._childContext.repositionAsyncEvents.value(null);
+          if (!this._childContext.repositionAsyncQueued) {
+            this._childContext.repositionAsyncQueued = true;
+            this._childContext.repositionAsyncEvents.value(null);
+          }
         });
 
       if (parentCtx.repositionAsyncQueued) {
