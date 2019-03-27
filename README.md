@@ -54,8 +54,10 @@ FloatAnchor has the following static methods:
  and need to determine whether an event's target is logically contained by a
  React component that has children that use FloatAnchor.
 
-The FloatAnchor component has a `reposition` method, which you should call if
-you change the size of the contents of the anchor or float elements.
+The FloatAnchor component has a `repositionAsync` method, which you should
+call if you change the size of the contents of the anchor or float elements.
+There's also a `reposition` method which you can call if you need the component
+to be repositioned synchronously.
 
 The container div of the `float` element has its `rfaAnchor` property set to
 be equal to the anchorRef DOM element.

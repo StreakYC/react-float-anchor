@@ -14,7 +14,16 @@ import isEqual from 'lodash/isEqual';
 const requestAnimationFrame = global.requestAnimationFrame || (cb => Promise.resolve().then(cb));
 
 type FloatAnchorContextType = {
-  repositionEvents: Kefir.Observable<null>;
+  // Emits an event after the component repositions, so the children can reposition themselves to match.
+  repositionEvents: Kefir.Observable<null>,
+
+  // Signifies this component has a repositionAsync queued up. Children components should ignore repositionAsync
+  // calls while this is true. Children should copy their parent whenever their parent sets theirs to true.
+  // Components should clear this flag when they reposition unless they have a parent with it still set.
+  repositionAsyncQueued: boolean,
+
+  // Emits every time repositionAsyncQueued becomes true.
+  repositionAsyncEvents: Kefir.Observable<null>
 };
 
 // Context is used so that when a FloatAnchor has reposition() called on it,
@@ -44,9 +53,10 @@ export default class FloatAnchor extends React.Component<Props> {
   _portalEl: ?HTMLElement;
   _portalRemoval: Bus<null> = kefirBus();
   _unmount: Bus<null> = kefirBus();
-  _repositionEvents: Bus<null> = kefirBus();
-  _childContext: FloatAnchorContextType = {
-    repositionEvents: this._repositionEvents
+  _childContext = {
+    repositionEvents: (kefirBus(): Bus<null>),
+    repositionAsyncQueued: false,
+    repositionAsyncEvents: (kefirBus(): Bus<null>)
   };
 
   _anchorRef: ?HTMLElement = null;
@@ -90,11 +100,22 @@ export default class FloatAnchor extends React.Component<Props> {
       parentCtx.repositionEvents
         .takeUntilBy(this._unmount)
         .onValue(() => this.reposition());
+
+      parentCtx.repositionAsyncEvents
+        .takeUntilBy(this._unmount)
+        .onValue(() => {
+          this._childContext.repositionAsyncQueued = true;
+          this._childContext.repositionAsyncEvents.value(null);
+        });
+
+      if (parentCtx.repositionAsyncQueued) {
+        this._childContext.repositionAsyncQueued = true;
+        this._childContext.repositionAsyncEvents.value(null);
+      }
     }
+
     // We need to reposition after the page has had its layout done.
-    requestAnimationFrame(() => {
-      this.reposition();
-    });
+    this.repositionAsync();
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -112,16 +133,17 @@ export default class FloatAnchor extends React.Component<Props> {
       prevProps.float !== this.props.float
     ) {
       this._updateFloat();
-      this.reposition();
+      this.repositionAsync();
     } else if (!isEqual(prevProps.options, this.props.options)) {
-      this.reposition();
+      this.repositionAsync();
     }
   }
 
   componentWillUnmount() {
-    this._portalRemoval.emit(null);
-    this._unmount.emit(null);
-    this._repositionEvents.end();
+    this._portalRemoval.value(null);
+    this._unmount.value(null);
+    this._childContext.repositionEvents.end();
+    this._childContext.repositionAsyncEvents.end();
   }
 
   _updateFloat() {
@@ -149,24 +171,55 @@ export default class FloatAnchor extends React.Component<Props> {
         ])
           .takeUntilBy(this._portalRemoval)
           .onValue(() => {
-            this.reposition();
+            this.repositionAsync();
           });
       }
     } else {
       if (portalEl && portalEl.parentElement) {
-        this._portalRemoval.emit(null);
+        this._portalRemoval.value(null);
       }
     }
   }
 
+  // Repositions on the next animation frame. Automatically batches with other repositionAsync calls
+  // in the same tree.
+  repositionAsync() {
+    // If we already have a repositionAsync queued up, there's no reason to queue another.
+    if (this._childContext.repositionAsyncQueued) {
+      return;
+    }
+    this._childContext.repositionAsyncQueued = true;
+    this._childContext.repositionAsyncEvents.value(null);
+
+    requestAnimationFrame(() => {
+      // If our parent still has a repositionAsync queued up, then don't fire.
+      // The parent may have queued up a repositionAsync in the time since this repositionAsync() was called.
+      const parentCtx: ?FloatAnchorContextType = this.context;
+      if (!parentCtx || !parentCtx.repositionAsyncQueued) {
+        // Make sure we still have a repositionAsync queued up. It could be that reposition() has been called
+        // in the time since repositionAsync().
+        if (this._childContext.repositionAsyncQueued) {
+          this._childContext.repositionAsyncQueued = false;
+          this.reposition();
+        }
+      }
+    });
+  }
+
   reposition() {
+    // Only clear our repositionAsyncQueued flag if we're not reflecting our parent's true value.
+    const parentCtx: ?FloatAnchorContextType = this.context;
+    if (!parentCtx || !parentCtx.repositionAsyncQueued) {
+      this._childContext.repositionAsyncQueued = false;
+    }
+
     const portalEl = this._portalEl;
     const anchorRef = this._anchorRef;
     if (portalEl && portalEl.parentElement && anchorRef) {
       containByScreen(portalEl, anchorRef, this.props.options || {});
 
       // Make any child FloatAnchors reposition
-      this._repositionEvents.emit(null);
+      this._childContext.repositionEvents.value(null);
     }
   }
 
@@ -176,7 +229,7 @@ export default class FloatAnchor extends React.Component<Props> {
     if (float != null) {
       const portalEl = this._getOrCreatePortalEl();
       floatPortal = (
-        <FloatAnchorContext.Provider value={this._childContext}>
+        <FloatAnchorContext.Provider value={(this._childContext: FloatAnchorContextType)}>
           {createPortal(float, portalEl)}
         </FloatAnchorContext.Provider>
       );
