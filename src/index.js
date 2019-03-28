@@ -72,29 +72,47 @@ export default class FloatAnchor extends React.Component<Props> {
 
     const portalEl = this._portalEl;
     if (portalEl) {
-      if (anchorRef) {
-        (portalEl: any).rfaAnchor = anchorRef;
-      } else {
-        delete (portalEl: any).rfaAnchor;
-      }
+      (portalEl: any).rfaAnchor = anchorRef ? anchorRef : undefined;
     }
   };
 
   _getOrCreatePortalEl(): HTMLElement {
-    let portalEl = this._portalEl;
-    if (portalEl) {
-      return portalEl;
+    const portalEl_firstCheck = this._portalEl;
+    if (portalEl_firstCheck) {
+      return portalEl_firstCheck;
     }
-    portalEl = this._portalEl = document.createElement('div');
+
+    const portalEl = this._portalEl = document.createElement('div');
     portalEl.className = this.props.floatContainerClassName || '';
     portalEl.style.zIndex = String(this.props.zIndex);
     portalEl.style.position = 'fixed';
+
+    const target = document.body || document.documentElement;
+    /*:: if (!target) throw new Error(); */
+    target.appendChild(portalEl);
+
+    Kefir.merge([
+      Kefir.fromEvents(window, 'resize'),
+      fromEventsWithOptions(window, 'scroll', { capture: true, passive: true })
+        .filter(event => {
+          const anchorRef = this._anchorRef;
+          return anchorRef && event.target.contains(anchorRef);
+        })
+    ])
+      .takeUntilBy(this._portalRemoval)
+      .onValue(() => {
+        this.repositionAsync();
+      })
+      .onEnd(() => {
+        (portalEl: any).rfaAnchor = undefined;
+        /*:: if (!portalEl.parentElement) throw new Error(); */
+        portalEl.parentElement.removeChild(portalEl);
+      });
 
     return portalEl;
   }
 
   componentDidMount() {
-    this._updateFloat();
     const parentCtx: ?FloatAnchorContextType = this.context;
     if (parentCtx) {
       parentCtx.repositionEvents
@@ -116,28 +134,41 @@ export default class FloatAnchor extends React.Component<Props> {
       }
     }
 
-    // We need to reposition after the page has had its layout done.
-    this.repositionAsync();
+    if (this.props.float != null) {
+      // We need to reposition after the page has had its layout done.
+      this.repositionAsync();
+    }
   }
 
   componentDidUpdate(prevProps: Props) {
     const portalEl = this._portalEl;
     if (portalEl) {
-      if (prevProps.floatContainerClassName !== this.props.floatContainerClassName) {
-        portalEl.className = this.props.floatContainerClassName || '';
-      }
-      if (prevProps.zIndex !== this.props.zIndex) {
-        portalEl.style.zIndex = String(this.props.zIndex);
-      }
-    }
+      if (this.props.float == null) {
+        this._portalRemoval.value(null);
+      } else {
+        if (prevProps.floatContainerClassName !== this.props.floatContainerClassName) {
+          portalEl.className = this.props.floatContainerClassName || '';
+        }
+        if (prevProps.zIndex !== this.props.zIndex) {
+          portalEl.style.zIndex = String(this.props.zIndex);
+        }
 
-    if (
-      prevProps.float !== this.props.float
-    ) {
-      this._updateFloat();
-      this.repositionAsync();
-    } else if (!isEqual(prevProps.options, this.props.options)) {
-      this.repositionAsync();
+        if (prevProps.float == null && this.props.float != null) {
+          const anchorRef = this._anchorRef;
+          if (!anchorRef) throw new Error('ReactFloatAnchor missing anchorRef element');
+          (portalEl: any).rfaAnchor = anchorRef;
+        }
+        if (
+          prevProps.float !== this.props.float ||
+          !isEqual(prevProps.options, this.props.options)
+        ) {
+          this.repositionAsync();
+        }
+      }
+    } else {
+      if (this.props.float != null) {
+        throw new Error('Should not happen: portalEl was null after rendering with float prop');
+      }
     }
   }
 
@@ -146,41 +177,6 @@ export default class FloatAnchor extends React.Component<Props> {
     this._unmount.value(null);
     this._childContext.repositionEvents.end();
     this._childContext.repositionAsyncEvents.end();
-  }
-
-  _updateFloat() {
-    const {float} = this.props;
-    const portalEl = this._portalEl;
-
-    if (float) {
-      if (!portalEl) throw new Error('Should not happen: portalEl not initialized');
-
-      if (!portalEl.parentElement) {
-        const anchorRef = this._anchorRef;
-        if (!anchorRef) throw new Error('ReactFloatAnchor missing anchorRef element');
-        const target = document.body || document.documentElement;
-        if (!target) throw new Error('Could not find element to attach portal to');
-        target.appendChild(portalEl);
-        (portalEl: any).rfaAnchor = anchorRef;
-        this._portalRemoval.take(1).onValue(() => {
-          (portalEl: any).rfaAnchor = undefined;
-          if (portalEl.parentElement) portalEl.parentElement.removeChild(portalEl);
-        });
-        Kefir.merge([
-          Kefir.fromEvents(window, 'resize'),
-          fromEventsWithOptions(window, 'scroll', {capture: true, passive: true})
-            .filter(event => event.target.contains(anchorRef))
-        ])
-          .takeUntilBy(this._portalRemoval)
-          .onValue(() => {
-            this.repositionAsync();
-          });
-      }
-    } else {
-      if (portalEl && portalEl.parentElement) {
-        this._portalRemoval.value(null);
-      }
-    }
   }
 
   // Repositions on the next animation frame. Automatically batches with other repositionAsync calls
@@ -229,6 +225,8 @@ export default class FloatAnchor extends React.Component<Props> {
     const {anchor, float} = this.props;
     let floatPortal = null;
     if (float != null) {
+      // TODO If an async render calls this line, but then is aborted before finishing,
+      // does this portal element get cleaned up?
       const portalEl = this._getOrCreatePortalEl();
       floatPortal = (
         <FloatAnchorContext.Provider value={(this._childContext: FloatAnchorContextType)}>

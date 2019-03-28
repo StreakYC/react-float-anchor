@@ -208,3 +208,32 @@ test('works with react-test-renderer without float', () => {
   let tree = component.toJSON();
   expect(tree).toMatchSnapshot();
 });
+
+test('element is in DOM during componentDidMount', () => {
+  let wasInDomDuringMount = null;
+
+  class MountTester extends React.Component<*> {
+    _ref = React.createRef();
+
+    componentDidMount() {
+      wasInDomDuringMount =
+        (document.body: any).contains(this._ref.current) &&
+        document.querySelector('.element-in-dom-test') != null;
+    }
+
+    render() {
+      return <div ref={this._ref}>foo</div>;
+    }
+  }
+
+  TestUtils.renderIntoDocument(
+    <FloatAnchor
+      floatContainerClassName="element-in-dom-test"
+      anchor={anchorRef => <div ref={anchorRef}>foo</div>}
+      float={<MountTester />}
+      zIndex={1337}
+    />
+  );
+
+  expect(wasInDomDuringMount).toBe(true);
+});
