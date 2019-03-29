@@ -132,11 +132,6 @@ export default class FloatAnchor extends React.Component<Props> {
           portalEl.style.zIndex = String(this.props.zIndex);
         }
 
-        if (prevProps.float == null && this.props.float != null) {
-          const anchorRef = this._anchorRef;
-          if (!anchorRef) throw new Error('ReactFloatAnchor missing anchorRef element');
-          (portalEl: any).rfaAnchor = anchorRef;
-        }
         if (
           prevProps.float !== this.props.float ||
           !isEqual(prevProps.options, this.props.options)
@@ -206,6 +201,10 @@ export default class FloatAnchor extends React.Component<Props> {
     if (portalEl.parentElement) {
       throw new Error('Should not happen: portalEl already in page');
     }
+
+    const anchorRef = this._anchorRef;
+    if (!anchorRef) throw new Error('ReactFloatAnchor missing anchorRef element');
+    (portalEl: any).rfaAnchor = anchorRef;
 
     const target = document.body || document.documentElement;
     /*:: if (!target) throw new Error(); */
