@@ -1,3 +1,9 @@
+## 3.1.0 (2019-03-28)
+
+* Added the `repositionAsync()` method to FloatAnchor. This method should generally be used instead of `reposition()` because it allows multiple queued repositions to be coalesced together.
+* Fixed multiple O(n^2) issues with nested FloatAnchors that caused them to be repositioned redundantly when the outer FloatAnchors were repositioned.
+* Fixed `autoFocus` prop not working on input elements and similar components inside of a floated element. The float element container div is now added to the page body before any of the float elements' componentDidMount methods are called.
+
 ## 3.0.0 (2018-10-30)
 
 ### Breaking Changes
