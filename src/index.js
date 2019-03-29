@@ -1,6 +1,7 @@
 /* @flow */
 
 import fromEventsWithOptions from './lib/fromEventsWithOptions';
+import LifecycleHelper from './LifecycleHelper';
 import Kefir from 'kefir';
 import kefirBus from 'kefir-bus';
 import type {Bus} from 'kefir-bus';
@@ -86,28 +87,6 @@ export default class FloatAnchor extends React.Component<Props> {
     portalEl.className = this.props.floatContainerClassName || '';
     portalEl.style.zIndex = String(this.props.zIndex);
     portalEl.style.position = 'fixed';
-
-    const target = document.body || document.documentElement;
-    /*:: if (!target) throw new Error(); */
-    target.appendChild(portalEl);
-
-    Kefir.merge([
-      Kefir.fromEvents(window, 'resize'),
-      fromEventsWithOptions(window, 'scroll', { capture: true, passive: true })
-        .filter(event => {
-          const anchorRef = this._anchorRef;
-          return anchorRef && event.target.contains(anchorRef);
-        })
-    ])
-      .takeUntilBy(this._portalRemoval)
-      .onValue(() => {
-        this.repositionAsync();
-      })
-      .onEnd(() => {
-        (portalEl: any).rfaAnchor = undefined;
-        /*:: if (!portalEl.parentElement) throw new Error(); */
-        portalEl.parentElement.removeChild(portalEl);
-      });
 
     return portalEl;
   }
@@ -221,15 +200,46 @@ export default class FloatAnchor extends React.Component<Props> {
     }
   }
 
+  _mountPortalEl = () => {
+    const portalEl = this._portalEl;
+    /*:: if (!portalEl) throw new Error(); */
+    if (portalEl.parentElement) {
+      throw new Error('Should not happen: portalEl already in page');
+    }
+
+    const target = document.body || document.documentElement;
+    /*:: if (!target) throw new Error(); */
+    target.appendChild(portalEl);
+
+    Kefir.merge([
+      Kefir.fromEvents(window, 'resize'),
+      fromEventsWithOptions(window, 'scroll', {
+        capture: true,
+        passive: true
+      }).filter(event => {
+        const anchorRef = this._anchorRef;
+        return anchorRef && event.target.contains(anchorRef);
+      })
+    ])
+      .takeUntilBy(this._portalRemoval)
+      .onValue(() => {
+        this.repositionAsync();
+      })
+      .onEnd(() => {
+        (portalEl: any).rfaAnchor = undefined;
+        /*:: if (!portalEl.parentElement) throw new Error(); */
+        portalEl.parentElement.removeChild(portalEl);
+      });
+  };
+
   render() {
     const {anchor, float} = this.props;
     let floatPortal = null;
     if (float != null) {
-      // TODO If an async render calls this line, but then is aborted before finishing,
-      // does this portal element get cleaned up?
       const portalEl = this._getOrCreatePortalEl();
       floatPortal = (
         <FloatAnchorContext.Provider value={(this._childContext: FloatAnchorContextType)}>
+          <LifecycleHelper onMount={this._mountPortalEl} />
           {createPortal(float, portalEl)}
         </FloatAnchorContext.Provider>
       );
