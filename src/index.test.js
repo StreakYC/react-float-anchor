@@ -8,8 +8,6 @@ import TestUtils from 'react-dom/test-utils';
 import renderer from 'react-test-renderer';
 import FloatAnchor from '../src';
 
-window.requestAnimationFrame = function() {};
-
 test('mounts', sinonTest(function() {
   // TODO test resize and scroll handlers
   this.spy(window, 'addEventListener');
