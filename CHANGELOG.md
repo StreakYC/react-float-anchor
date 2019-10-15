@@ -1,3 +1,7 @@
+## 3.2.0 (2019-10-15)
+
+* Added the `parentElement` prop.
+
 ## 3.1.0 (2019-03-28)
 
 * Added the `repositionAsync()` method to FloatAnchor. This method should generally be used instead of `reposition()` because it allows multiple queued repositions to be coalesced together.
