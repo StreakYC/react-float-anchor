@@ -127,6 +127,10 @@ export default class FloatAnchor extends React.Component<Props> {
       if (this.props.float == null) {
         this._portalRemoval.value(null);
       } else {
+        if (prevProps.parentElement !== this.props.parentElement) {
+          this._portalRemoval.value(null);
+          this._mountPortalEl();
+        }
         if (prevProps.floatContainerClassName !== this.props.floatContainerClassName) {
           portalEl.className = this.props.floatContainerClassName || '';
         }

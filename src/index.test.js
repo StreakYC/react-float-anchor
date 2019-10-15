@@ -207,6 +207,50 @@ test('supports parentElement', () => {
   expect(parentElement.querySelector('.float')).toBeTruthy();
 });
 
+test('supports changing parentElement', () => {
+  const mountPoint = document.createElement('div');
+  const parentElement1 = document.createElement('div');
+  const parentElement2 = document.createElement('div');
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
+      float={<div className="float">float</div>}
+      parentElement={parentElement1}
+    />,
+    mountPoint
+  );
+
+  expect(document.querySelector('.float')).toBe(null);
+  expect(parentElement1.querySelector('.float')).toBeTruthy();
+  expect(parentElement2.querySelector('.float')).toBe(null);
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
+      float={<div className="float">float</div>}
+      parentElement={parentElement2}
+    />,
+    mountPoint
+  );
+
+  expect(document.querySelector('.float')).toBe(null);
+  expect(parentElement1.querySelector('.float')).toBe(null);
+  expect(parentElement2.querySelector('.float')).toBeTruthy();
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
+      float={<div className="float">float</div>}
+    />,
+    mountPoint
+  );
+
+  expect(document.querySelector('.float')).toBeTruthy();
+  expect(parentElement1.querySelector('.float')).toBe(null);
+  expect(parentElement2.querySelector('.float')).toBe(null);
+});
+
 test('works with react-test-renderer without float', () => {
   // Doesn't work in react-test-renderer when float prop is non-null, partly
   // because https://github.com/facebook/react/issues/11565
