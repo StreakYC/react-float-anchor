@@ -2,7 +2,7 @@
 
 import sinon from 'sinon';
 const sinonTest = require('sinon-test')(sinon);
-import React from 'react';
+import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-dom/test-utils';
 import renderer from 'react-test-renderer';
