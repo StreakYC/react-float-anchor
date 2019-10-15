@@ -35,8 +35,8 @@ following props:
 * `float` must be null, or a React node. If null, then FloatAnchor won't do
  anything other than render `anchor` as-is. If non-null, `float` will be
  rendered in a container div which has `position:fixed` styling, is attached
- directly to the document body, and is positioned to line up with the anchorRef
- element.
+ directly to the document body (or parentElement), and is positioned to line up
+ with the anchorRef element.
 * `options` is an optional object of options to control how the float element's
  container is aligned to the anchor element. The options are the same as those
  supported by [contain-by-screen (version ^1.0)](https://github.com/AgentME/contain-by-screen#readme).
@@ -44,6 +44,8 @@ following props:
  float element's container.
 * `floatContainerClassName` is an optional string specifying a CSS class to
  apply to the float element's container div.
+* `parentElement` is an optional HTMLElement to attach the float element
+ container div to. This defaults to the page body element.
 
 FloatAnchor has the following static methods:
 
