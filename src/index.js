@@ -44,7 +44,7 @@ export type Props = {
 export default class FloatAnchor extends React.Component<Props> {
   static propTypes = {
     anchor: PropTypes.func.isRequired,
-    parentElement: PropTypes.any,
+    parentElement: PropTypes.object,
     float: PropTypes.node,
     options: PropTypes.object,
     zIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -198,7 +198,6 @@ export default class FloatAnchor extends React.Component<Props> {
   }
 
   _mountPortalEl = () => {
-    const { parentElement } = this.props;
     const portalEl = this._portalEl;
     /*:: if (!portalEl) throw new Error(); */
     if (portalEl.parentElement) {
@@ -209,7 +208,7 @@ export default class FloatAnchor extends React.Component<Props> {
     if (!anchorRef) throw new Error('ReactFloatAnchor missing anchorRef element');
     (portalEl: any).rfaAnchor = anchorRef;
 
-    const target = parentElement ? parentElement : document.body || document.documentElement;
+    const target = this.props.parentElement || document.body || document.documentElement;
     /*:: if (!target) throw new Error(); */
     target.appendChild(portalEl);
 
