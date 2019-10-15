@@ -192,6 +192,21 @@ test('can add a (custom) class to the portal', () => {
   expect(document.querySelector('.my-floating-container')).toBeTruthy();
 });
 
+test('supports parentElement', () => {
+  const parentElement = document.createElement('div');
+
+  TestUtils.renderIntoDocument(
+    <FloatAnchor
+      anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
+      float={<div className="float">float</div>}
+      parentElement={parentElement}
+    />
+  );
+
+  expect(document.querySelector('.float')).toBe(null);
+  expect(parentElement.querySelector('.float')).toBeTruthy();
+});
+
 test('works with react-test-renderer without float', () => {
   // Doesn't work in react-test-renderer when float prop is non-null, partly
   // because https://github.com/facebook/react/issues/11565
