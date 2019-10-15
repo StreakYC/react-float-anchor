@@ -1,6 +1,6 @@
 {
   "name": "react-float-anchor",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "React component for positioning an element aligned to another",
   "main": "js/index.js",
   "sideEffects": false,
