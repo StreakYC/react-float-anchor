@@ -172,8 +172,9 @@ export default class FloatAnchor extends React.Component<Props, State> {
           portalEl.style.zIndex = String(this.props.zIndex);
         }
 
+        // If this re-render happened because of a change in position choice, don't reposition again now.
         if (
-          prevState.floatNode !== this.state.floatNode ||
+          (prevState.floatNode !== this.state.floatNode && prevState.choice === this.state.choice) ||
           !isEqual(prevProps.options, this.props.options)
         ) {
           this.repositionAsync();
