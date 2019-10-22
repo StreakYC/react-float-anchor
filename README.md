@@ -32,14 +32,19 @@ following props:
  returns a React node. The anchorRef value must be passed as the `ref` prop to
  an HTML element. The returned node will be placed in the page where the
  `FloatAnchor` element was used, with no added wrapper elements around it.
-* `float` must be null, or a React node. If null, then FloatAnchor won't do
- anything other than render `anchor` as-is. If non-null, `float` will be
- rendered in a container div which has `position:fixed` styling, is attached
- directly to the document body (or parentElement), and is positioned to line up
- with the anchorRef element.
+* `float` must be null, a React node, or a function that returns a React node.
+ If null, then FloatAnchor won't do anything other than render `anchor` as-is.
+ If non-null, the `float` React node will be rendered in a container div which
+ has `position:fixed` styling, is attached directly to the document body (or
+ parentElement), and is positioned to line up with the anchorRef element.
+ If `float` is a function, then the function will receive the return value from
+ the most recent call to [contain-by-screen](https://github.com/Macil/contain-by-screen),
+ or null if it hasn't been called yet. The initial render will pass null, and
+ then the component will be re-rendered after having been positioned by
+ contain-by-screen.
 * `options` is an optional object of options to control how the float element's
  container is aligned to the anchor element. The options are the same as those
- supported by [contain-by-screen (version ^1.0)](https://github.com/AgentME/contain-by-screen#readme).
+ supported by [contain-by-screen (version ^1.0)](https://github.com/Macil/contain-by-screen#readme).
 * `zIndex` is an optional number controlling the z-index CSS property of the
  float element's container.
 * `floatContainerClassName` is an optional string specifying a CSS class to

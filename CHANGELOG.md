@@ -1,3 +1,7 @@
+## 3.3.0 (2019-10-22)
+
+* The choice return value from contain-by-screen is now available if you pass a callback as the `float` prop.
+
 ## 3.2.0 (2019-10-15)
 
 * Added the `parentElement` prop.
