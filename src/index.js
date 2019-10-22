@@ -136,6 +136,25 @@ export default class FloatAnchor extends React.Component<Props, State> {
     };
   }
 
+  shouldComponentUpdate(nextProps: Props, nextState: State) {
+    // If the only thing changed is state.choice *and* typeof props.float !== 'function', don't re-render.
+    // If nothing has changed, allow the re-render so we keep the same behavior on a plain forceUpdate of a parent.
+    // TODO in next major version, don't re-render when nothing has changed.
+    if (
+      typeof nextProps.float !== 'function' &&
+      this.state.choice !== nextState.choice &&
+      this.props.anchor === nextProps.anchor &&
+      this.props.parentElement === nextProps.parentElement &&
+      this.props.float === nextProps.float &&
+      this.props.options === nextProps.options &&
+      this.props.zIndex === nextProps.zIndex &&
+      this.props.floatContainerClassName === nextProps.floatContainerClassName
+    ) {
+      return false;
+    }
+    return true;
+  }
+
   componentDidUpdate(prevProps: Props, prevState: State) {
     const portalEl = this._portalEl;
     if (portalEl) {

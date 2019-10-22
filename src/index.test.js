@@ -20,6 +20,10 @@ function makeRenderCounter() {
   return {getRenderCount, RenderCounter};
 }
 
+beforeEach(() => {
+  (document.body: any).textContent = '';
+});
+
 test('mounts', sinonTest(function() {
   // TODO test resize and scroll handlers
   this.spy(window, 'addEventListener');
@@ -137,7 +141,7 @@ test('rfaAnchor updates if anchor element changes', () => {
   ReactDOM.unmountComponentAtNode(mountPoint);
 });
 
-test('float can be added and removed', () => {
+test('float can be added and removed', async () => {
   const mountPoint = document.createElement('div');
   const {getRenderCount, RenderCounter} = makeRenderCounter();
 
@@ -151,6 +155,7 @@ test('float can be added and removed', () => {
     />,
     mountPoint
   );
+  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(1);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
@@ -167,6 +172,7 @@ test('float can be added and removed', () => {
     />,
     mountPoint
   );
+  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(2);
   const floatedThing = document.querySelector('.floatedThing');
@@ -187,6 +193,7 @@ test('float can be added and removed', () => {
     />,
     mountPoint
   );
+  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(3);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
