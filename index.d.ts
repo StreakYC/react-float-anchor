@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import {Options} from 'contain-by-screen';
+import {Options, Choice} from 'contain-by-screen';
 
-export {Options} from 'contain-by-screen';
+export {Options, Choice} from 'contain-by-screen';
 
 export type Props = {
   anchor: (anchorRef: React.Ref<any>) => React.ReactNode;
-  float?: React.ReactNode | null | undefined;
+  float?: React.ReactNode | ((choice: Choice | null) => React.ReactNode) | null | undefined;
   options?: Options | null | undefined;
   zIndex?: number | string | null | undefined;
   floatContainerClassName?: string | null | undefined;

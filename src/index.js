@@ -9,7 +9,7 @@ import React from 'react';
 import {createPortal} from 'react-dom';
 import PropTypes from 'prop-types';
 import containByScreen from 'contain-by-screen';
-import type {Options} from 'contain-by-screen';
+import type {Options, Choice} from 'contain-by-screen';
 import isEqual from 'lodash/isEqual';
 
 const requestAnimationFrame = global.requestAnimationFrame || (cb => Promise.resolve().then(cb));
@@ -31,27 +31,36 @@ type FloatAnchorContextType = {
 // all of its descendant FloatAnchor elements reposition too.
 const FloatAnchorContext = React.createContext<?FloatAnchorContextType>(null);
 
-export type {Options} from 'contain-by-screen';
+export type {Options, Choice} from 'contain-by-screen';
 
 export type Props = {
   anchor: (anchorRef: React$Ref<any>) => React$Node;
   parentElement?: ?HTMLElement;
-  float?: ?React$Node;
+  float?: ?React$Node | ((choice: Choice | null) => React$Node);
   options?: ?Options;
   zIndex?: ?number|string;
   floatContainerClassName?: ?string;
 };
-export default class FloatAnchor extends React.Component<Props> {
+type State = {
+  choice: Choice | null;
+  floatNode: ?React$Node;
+};
+export default class FloatAnchor extends React.Component<Props, State> {
   static propTypes = {
     anchor: PropTypes.func.isRequired,
     parentElement: PropTypes.object,
-    float: PropTypes.node,
+    float: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     options: PropTypes.object,
     zIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     floatContainerClassName: PropTypes.string
   };
 
   static contextType = FloatAnchorContext;
+
+  state: State = {
+    choice: null,
+    floatNode: null
+  };
 
   _portalEl: ?HTMLElement;
   _portalRemoval: Bus<null> = kefirBus();
@@ -115,16 +124,22 @@ export default class FloatAnchor extends React.Component<Props> {
       }
     }
 
-    if (this.props.float != null) {
+    if (this.state.floatNode != null) {
       // We need to reposition after the page has had its layout done.
       this.repositionAsync();
     }
   }
 
-  componentDidUpdate(prevProps: Props) {
+  static getDerivedStateFromProps(props: Props, state: State): $Shape<State> | null {
+    return {
+      floatNode: typeof props.float === 'function' ? props.float(state.choice) : props.float
+    };
+  }
+
+  componentDidUpdate(prevProps: Props, prevState: State) {
     const portalEl = this._portalEl;
     if (portalEl) {
-      if (this.props.float == null) {
+      if (this.state.floatNode == null) {
         this._portalRemoval.value(null);
       } else {
         if (prevProps.parentElement !== this.props.parentElement) {
@@ -139,14 +154,14 @@ export default class FloatAnchor extends React.Component<Props> {
         }
 
         if (
-          prevProps.float !== this.props.float ||
+          prevState.floatNode !== this.state.floatNode ||
           !isEqual(prevProps.options, this.props.options)
         ) {
           this.repositionAsync();
         }
       }
     } else {
-      if (this.props.float != null) {
+      if (this.state.floatNode != null) {
         throw new Error('Should not happen: portalEl was null after rendering with float prop');
       }
     }
@@ -194,7 +209,10 @@ export default class FloatAnchor extends React.Component<Props> {
     const portalEl = this._portalEl;
     const anchorRef = this._anchorRef;
     if (portalEl && portalEl.parentElement && anchorRef) {
-      containByScreen(portalEl, anchorRef, this.props.options || {});
+      const choice = containByScreen(portalEl, anchorRef, this.props.options || {});
+      if (!isEqual(this.state.choice, choice)) {
+        this.setState({choice});
+      }
 
       // Make any child FloatAnchors reposition
       this._childContext.repositionEvents.value(null);
@@ -238,7 +256,8 @@ export default class FloatAnchor extends React.Component<Props> {
   };
 
   render() {
-    const {anchor, float} = this.props;
+    const {anchor} = this.props;
+    const float = this.state.floatNode;
     let floatPortal = null;
     if (float != null) {
       const portalEl = this._getOrCreatePortalEl();

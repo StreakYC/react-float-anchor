@@ -2,11 +2,23 @@
 
 import sinon from 'sinon';
 const sinonTest = require('sinon-test')(sinon);
-import React from 'react';
+import * as React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-dom/test-utils';
 import renderer from 'react-test-renderer';
 import FloatAnchor from '../src';
+
+function makeRenderCounter() {
+  let renderCount = 0;
+  function getRenderCount(): number {
+    return renderCount;
+  }
+  function RenderCounter(): React.Node {
+    renderCount++;
+    return null;
+  }
+  return {getRenderCount, RenderCounter};
+}
 
 test('mounts', sinonTest(function() {
   // TODO test resize and scroll handlers
@@ -127,11 +139,12 @@ test('rfaAnchor updates if anchor element changes', () => {
 
 test('float can be added and removed', () => {
   const mountPoint = document.createElement('div');
+  const {getRenderCount, RenderCounter} = makeRenderCounter();
 
   ReactDOM.render(
     <FloatAnchor
       anchor={anchorRef =>
-        <div ref={anchorRef}>foo</div>
+        <div ref={anchorRef}>foo<RenderCounter /></div>
       }
       float={null}
       zIndex={1337}
@@ -139,12 +152,13 @@ test('float can be added and removed', () => {
     mountPoint
   );
 
+  expect(getRenderCount()).toBe(1);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
 
   ReactDOM.render(
     <FloatAnchor
       anchor={anchorRef =>
-        <div ref={anchorRef}>foo</div>
+        <div ref={anchorRef}>foo<RenderCounter /></div>
       }
       float={
         <div className="floatedThing">blah</div>
@@ -154,6 +168,7 @@ test('float can be added and removed', () => {
     mountPoint
   );
 
+  expect(getRenderCount()).toBe(2);
   const floatedThing = document.querySelector('.floatedThing');
   if (!floatedThing) throw new Error('missing floatedThing');
 
@@ -165,7 +180,7 @@ test('float can be added and removed', () => {
   ReactDOM.render(
     <FloatAnchor
       anchor={anchorRef =>
-        <div ref={anchorRef}>foo</div>
+        <div ref={anchorRef}>foo<RenderCounter /></div>
       }
       float={null}
       zIndex={1337}
@@ -173,6 +188,7 @@ test('float can be added and removed', () => {
     mountPoint
   );
 
+  expect(getRenderCount()).toBe(3);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
   expect(document.contains(floatedThingParent)).toBe(false);
 
@@ -293,4 +309,98 @@ test('element is in DOM during componentDidMount', () => {
   );
 
   expect(wasInDomDuringMount).toBe(true);
+});
+
+test('float choice callback works', async () => {
+  const mountPoint = document.createElement('div');
+  const {getRenderCount, RenderCounter} = makeRenderCounter();
+  const {getRenderCount: getFloatRenderCount, RenderCounter: FloatRenderCounter} = makeRenderCounter();
+  const floatCb = jest.fn(choice => <div className="floatedThing">blah<FloatRenderCounter /></div>);
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo<RenderCounter /></div>
+      }
+      float={floatCb}
+      zIndex={1337}
+    />,
+    mountPoint
+  );
+  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
+
+  expect(getRenderCount()).toBe(2);
+  expect(getFloatRenderCount()).toBe(2);
+  expect(document.querySelector('.floatedThing')).toBeTruthy();
+  expect((document.querySelector('.floatedThing'): any).textContent).toBe('blah');
+
+  expect(floatCb.mock.calls).toEqual([
+    [null],
+    [{position: 'top', hAlign: 'center', vAlign: 'center'}]
+  ]);
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo<RenderCounter /></div>
+      }
+      float={floatCb}
+      zIndex={1337}
+    />,
+    mountPoint
+  );
+  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
+
+  expect(getRenderCount()).toBe(3);
+  expect(getFloatRenderCount()).toBe(3);
+  expect(floatCb.mock.calls).toEqual([
+    [null],
+    [{position: 'top', hAlign: 'center', vAlign: 'center'}],
+    [{position: 'top', hAlign: 'center', vAlign: 'center'}]
+  ]);
+
+  const floatCb2 = jest.fn(choice => <div className="floatedThing">blah2<FloatRenderCounter /></div>);
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo<RenderCounter /></div>
+      }
+      float={floatCb2}
+      zIndex={1337}
+    />,
+    mountPoint
+  );
+  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
+
+  expect(getRenderCount()).toBe(4);
+  expect(getFloatRenderCount()).toBe(4);
+  expect(document.querySelector('.floatedThing')).toBeTruthy();
+  expect((document.querySelector('.floatedThing'): any).textContent).toBe('blah2');
+
+  expect(floatCb.mock.calls.length).toEqual(3); // floatCb should not have been called again
+  expect(floatCb2.mock.calls).toEqual([
+    [{position: 'top', hAlign: 'center', vAlign: 'center'}]
+  ]);
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchorRef =>
+        <div ref={anchorRef}>foo<RenderCounter /></div>
+      }
+      float={null}
+      zIndex={1337}
+    />,
+    mountPoint
+  );
+  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
+
+  expect(getRenderCount()).toBe(5);
+  expect(getFloatRenderCount()).toBe(4);
+  expect(document.querySelector('.floatedThing')).toBeFalsy();
+
+  expect(floatCb.mock.calls.length).toEqual(3); // floatCb should not have been called again
+  expect(floatCb2.mock.calls.length).toEqual(1); // floatCb2 should not have been called again
+
+  ReactDOM.unmountComponentAtNode(mountPoint);
 });
