@@ -34,7 +34,7 @@ const FloatAnchorContext = React.createContext<?FloatAnchorContextType>(null);
 export type {Options, Choice} from 'contain-by-screen';
 
 export type Props = {
-  anchor: (anchorRef: React$Ref<any>) => React$Node;
+  anchor: ((anchorRef: React$Ref<any>) => React$Node) | HTMLElement;
   parentElement?: ?HTMLElement;
   float?: ?React$Node | ((choice: Choice | null) => React$Node);
   options?: ?Options;
@@ -47,7 +47,7 @@ type State = {
 };
 export default class FloatAnchor extends React.Component<Props, State> {
   static propTypes = {
-    anchor: PropTypes.func.isRequired,
+    anchor: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
     parentElement: PropTypes.object,
     float: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     options: PropTypes.object,
@@ -71,22 +71,28 @@ export default class FloatAnchor extends React.Component<Props, State> {
     repositionAsyncEvents: (kefirBus(): Bus<null>)
   };
 
-  _anchorRef: ?HTMLElement = null;
-
   static *parentNodes(node: Node): Iterator<Node> {
     do {
       yield (node: Node);
     } while ((node = (node: any).rfaAnchor || (node: any).parentNode));
   }
 
+  // This property is only used in the case that props.anchor is not an HTMLElement
+  _anchorRef: ?HTMLElement = null;
+
   _setAnchorRef = (anchorRef: ?HTMLElement) => {
     this._anchorRef = anchorRef;
 
     const portalEl = this._portalEl;
     if (portalEl) {
+      // rfaAnchor is also set in _mountPortal. This line is necessary in the case that
+      // the anchorRef is updated.
       (portalEl: any).rfaAnchor = anchorRef ? anchorRef : undefined;
     }
   };
+  _getAnchorRef(): ?HTMLElement {
+    return typeof this.props.anchor === 'function' ? this._anchorRef : this.props.anchor;
+  }
 
   _getOrCreatePortalEl(): HTMLElement {
     const portalEl_firstCheck = this._portalEl;
@@ -172,8 +178,12 @@ export default class FloatAnchor extends React.Component<Props, State> {
           portalEl.style.zIndex = String(this.props.zIndex);
         }
 
-        // If this re-render happened because of a change in position choice, don't reposition again now.
-        if (
+        // If anchor is an HTMLElement and has changed, then update portalEl.rfaAnchor
+        if (typeof this.props.anchor !== 'function' && prevProps.anchor !== this.props.anchor) {
+          (portalEl: any).rfaAnchor = this.props.anchor;
+          this.repositionAsync();
+        } else if (
+          // If this re-render happened because of a change in position choice, don't reposition again now.
           (prevState.floatNode !== this.state.floatNode && prevState.choice === this.state.choice) ||
           !isEqual(prevProps.options, this.props.options)
         ) {
@@ -227,7 +237,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
     }
 
     const portalEl = this._portalEl;
-    const anchorRef = this._anchorRef;
+    const anchorRef = this._getAnchorRef();
     if (portalEl && portalEl.parentElement && anchorRef) {
       const choice = containByScreen(portalEl, anchorRef, this.props.options || {});
       if (!isEqual(this.state.choice, choice)) {
@@ -246,7 +256,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
       throw new Error('Should not happen: portalEl already in page');
     }
 
-    const anchorRef = this._anchorRef;
+    const anchorRef = this._getAnchorRef();
     if (!anchorRef) throw new Error('ReactFloatAnchor missing anchorRef element');
     (portalEl: any).rfaAnchor = anchorRef;
 
@@ -260,7 +270,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
         capture: true,
         passive: true
       }).filter(event => {
-        const anchorRef = this._anchorRef;
+        const anchorRef = this._getAnchorRef();
         return anchorRef && event.target.contains(anchorRef);
       })
     ])
@@ -289,9 +299,11 @@ export default class FloatAnchor extends React.Component<Props, State> {
       );
     }
 
+    const anchorElement = typeof anchor === 'function' ? anchor((this._setAnchorRef: any)) : null;
+
     return (
       <>
-        {anchor((this._setAnchorRef: any))}
+        {anchorElement}
         {floatPortal}
       </>
     );

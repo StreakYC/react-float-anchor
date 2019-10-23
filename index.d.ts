@@ -5,7 +5,7 @@ import {Options, Choice} from 'contain-by-screen';
 export {Options, Choice} from 'contain-by-screen';
 
 export type Props = {
-  anchor: (anchorRef: React.Ref<any>) => React.ReactNode;
+  anchor: ((anchorRef: React.Ref<any>) => React.ReactNode) | HTMLElement;
   float?: React.ReactNode | ((choice: Choice | null) => React.ReactNode) | null | undefined;
   options?: Options | null | undefined;
   zIndex?: number | string | null | undefined;
