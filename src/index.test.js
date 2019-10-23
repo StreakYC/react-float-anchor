@@ -215,6 +215,117 @@ test('can add a (custom) class to the portal', () => {
   expect(document.querySelector('.my-floating-container')).toBeTruthy();
 });
 
+test('supports HTMLElement as anchor', () => {
+  const mountPoint = document.createElement('div');
+  const anchor = document.createElement('div');
+  const anchor2 = document.createElement('div');
+  (document.body: any).appendChild(anchor);
+  (document.body: any).appendChild(anchor2);
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchor}
+      float={
+        <div className="floatedThing">blah</div>
+      }
+    />,
+    mountPoint
+  );
+
+  const float = document.querySelector('.floatedThing');
+  if (!float) throw new Error('should not happen');
+  const floatParent = float.parentNode;
+
+  {
+    const parentNodes = Array.from(FloatAnchor.parentNodes(float));
+    expect(parentNodes[0]).toBe(float);
+    expect(parentNodes[1]).toBe(floatParent);
+    expect(parentNodes[2]).toBe(anchor);
+    expect(parentNodes[3]).toBe(document.body);
+    expect(parentNodes[4]).toBe(document.documentElement);
+    expect(parentNodes[5]).toBe(document);
+    expect(parentNodes.length).toBe(6);
+  }
+
+  expect((floatParent: any).rfaAnchor).toBe(anchor);
+
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchor2}
+      float={
+        <div className="floatedThing">blah</div>
+      }
+    />,
+    mountPoint
+  );
+
+  {
+    const parentNodes = Array.from(FloatAnchor.parentNodes(float));
+    expect(parentNodes[0]).toBe(float);
+    expect(parentNodes[1]).toBe(floatParent);
+    expect(parentNodes[2]).toBe(anchor2);
+    expect(parentNodes[3]).toBe(document.body);
+    expect(parentNodes[4]).toBe(document.documentElement);
+    expect(parentNodes[5]).toBe(document);
+    expect(parentNodes.length).toBe(6);
+  }
+
+  expect((floatParent: any).rfaAnchor).toBe(anchor2);
+
+  // switch anchor from HTMLElement to a React element
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchorRef => <div id="foo" ref={anchorRef}>foo</div>}
+      float={
+        <div className="floatedThing">blah</div>
+      }
+    />,
+    mountPoint
+  );
+
+  const foo = mountPoint.querySelector('#foo');
+  if (!foo) throw new Error();
+
+  {
+    const parentNodes = Array.from(FloatAnchor.parentNodes(float));
+    expect(parentNodes[0]).toBe(float);
+    expect(parentNodes[1]).toBe(floatParent);
+    expect(parentNodes[2]).toBe(foo);
+    expect(parentNodes[3]).toBe(mountPoint);
+    expect(parentNodes.length).toBe(4);
+  }
+
+  expect((floatParent: any).rfaAnchor).toBe(foo);
+
+  // switch anchor back to HTMLElement
+  ReactDOM.render(
+    <FloatAnchor
+      anchor={anchor}
+      float={
+        <div className="floatedThing">blah</div>
+      }
+    />,
+    mountPoint
+  );
+
+  {
+    const parentNodes = Array.from(FloatAnchor.parentNodes(float));
+    expect(parentNodes[0]).toBe(float);
+    expect(parentNodes[1]).toBe(floatParent);
+    expect(parentNodes[2]).toBe(anchor);
+    expect(parentNodes[3]).toBe(document.body);
+    expect(parentNodes[4]).toBe(document.documentElement);
+    expect(parentNodes[5]).toBe(document);
+    expect(parentNodes.length).toBe(6);
+  }
+
+  expect((floatParent: any).rfaAnchor).toBe(anchor);
+
+  ReactDOM.unmountComponentAtNode(mountPoint);
+  anchor.remove();
+  anchor2.remove();
+});
+
 test('supports parentElement', () => {
   const parentElement = document.createElement('div');
 
