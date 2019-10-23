@@ -1,3 +1,7 @@
+## 3.4.0 (2019-10-22)
+
+* Added support for passing an HTMLElement as the `anchor` prop.
+
 ## 3.3.0 (2019-10-22)
 
 * The choice return value from contain-by-screen is now available if you pass a callback as the `float` prop.

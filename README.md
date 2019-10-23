@@ -32,6 +32,8 @@ following props:
  returns a React node. The anchorRef value must be passed as the `ref` prop to
  an HTML element. The returned node will be placed in the page where the
  `FloatAnchor` element was used, with no added wrapper elements around it.
+ Alternatively, `anchor` may be a reference to a pre-existing HTMLElement.
+ Use this if you want to attach to a non-React HTMLElement on the page.
 * `float` must be null, a React node, or a function that returns a React node.
  If null, then FloatAnchor won't do anything other than render `anchor` as-is.
  If non-null, the `float` React node will be rendered in a container div which
