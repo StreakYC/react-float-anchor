@@ -13,6 +13,23 @@ The above example can be tried here:
 
 https://streakyc.github.io/react-float-anchor/example/
 
+```ts
+<FloatAnchor
+  options={{ position: 'right', vAlign: 'top', hAlign: 'left' }}
+  anchor={anchorRef => (
+    <div ref={anchorRef} style={{ border: '1px dashed gray', display: 'inline-block' }}>
+      Planets
+    </div>
+  )}
+  float={
+    <div style={{ border: '1px solid black', background: 'white' }}>
+      Mercury
+      ...
+    </div>
+  }
+/>
+```
+
 You can find its code in the `example` directory. The example may be compiled
 by running:
 
