@@ -5,7 +5,7 @@ import LifecycleHelper from './LifecycleHelper';
 import Kefir from 'kefir';
 import kefirBus from 'kefir-bus';
 import type {Bus} from 'kefir-bus';
-import React from 'react';
+import * as React from 'react';
 import {createPortal} from 'react-dom';
 import PropTypes from 'prop-types';
 import containByScreen from 'contain-by-screen';
@@ -25,6 +25,12 @@ type FloatAnchorContextType = {
 
   // Emits every time repositionAsyncQueued becomes true.
   repositionAsyncEvents: Kefir.Observable<null>
+};
+
+type FloatAnchorOwnContextType = {
+  repositionEvents: Bus<null, any>,
+  repositionAsyncQueued: boolean,
+  repositionAsyncEvents: Bus<null, any>
 };
 
 // Context is used so that when a FloatAnchor has reposition() called on it,
@@ -55,7 +61,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
     floatContainerClassName: PropTypes.string
   };
 
-  static contextType = FloatAnchorContext;
+  static contextType: any = FloatAnchorContext;
 
   state: State = {
     choice: null,
@@ -65,7 +71,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
   _portalEl: ?HTMLElement;
   _portalRemoval: Bus<null> = kefirBus();
   _unmount: Bus<null> = kefirBus();
-  _childContext = {
+  _childContext: FloatAnchorOwnContextType = {
     repositionEvents: (kefirBus(): Bus<null>),
     repositionAsyncQueued: false,
     repositionAsyncEvents: (kefirBus(): Bus<null>)
@@ -80,7 +86,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
   // This property is only used in the case that props.anchor is not an HTMLElement
   _anchorRef: ?HTMLElement = null;
 
-  _setAnchorRef = (anchorRef: ?HTMLElement) => {
+  _setAnchorRef: (anchorRef: ?HTMLElement) => void = (anchorRef: ?HTMLElement) => {
     this._anchorRef = anchorRef;
 
     const portalEl = this._portalEl;
@@ -142,7 +148,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
     };
   }
 
-  shouldComponentUpdate(nextProps: Props, nextState: State) {
+  shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
     // If the only thing changed is state.choice *and* typeof props.float !== 'function', don't re-render.
     // If nothing has changed, allow the re-render so we keep the same behavior on a plain forceUpdate of a parent.
     // TODO in next major version, don't re-render when nothing has changed.
@@ -249,7 +255,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
     }
   }
 
-  _mountPortalEl = () => {
+  _mountPortalEl: () => void = () => {
     const portalEl = this._portalEl;
     /*:: if (!portalEl) throw new Error(); */
     if (portalEl.parentElement) {
@@ -285,14 +291,14 @@ export default class FloatAnchor extends React.Component<Props, State> {
       });
   };
 
-  render() {
+  render(): React.Node {
     const {anchor} = this.props;
     const float = this.state.floatNode;
     let floatPortal = null;
     if (float != null) {
       const portalEl = this._getOrCreatePortalEl();
       floatPortal = (
-        <FloatAnchorContext.Provider value={(this._childContext: FloatAnchorContextType)}>
+        <FloatAnchorContext.Provider value={((this._childContext: any): FloatAnchorContextType)}>
           <LifecycleHelper onMount={this._mountPortalEl} />
           {createPortal(float, portalEl)}
         </FloatAnchorContext.Provider>
