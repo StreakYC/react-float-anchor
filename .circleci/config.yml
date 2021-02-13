@@ -10,7 +10,7 @@ jobs:
           keys:
             - yarn-packages-{{ .Branch }}-{{ checksum "yarn.lock" }}
             - yarn-packages-{{ .Branch }}
-            - yarn-packages-master
+            - yarn-packages-main
             - yarn-packages-
       - run:
           name: Prepare Greenkeeper
