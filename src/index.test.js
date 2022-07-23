@@ -1,4 +1,7 @@
-/* @flow */
+/**
+ * @flow
+ * @jest-environment jsdom
+ */
 
 import sinon from 'sinon';
 const sinonTest = require('sinon-test')(sinon);
