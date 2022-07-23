@@ -2,7 +2,7 @@
 /*eslint no-console: "off" */
 
 import * as React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import Example from './Example';
 
 const onReady = new Promise(resolve => {
@@ -21,5 +21,6 @@ onReady.then(main).catch(e => {
 function main() {
   const mainDiv = document.getElementById('main');
   if (!mainDiv) throw new Error('should not happen');
-  ReactDOM.render(<Example />, mainDiv);
+  const root = createRoot(mainDiv);
+  root.render(<Example />);
 }

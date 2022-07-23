@@ -1,4 +1,4 @@
-/**
+/*
  * @flow
  * @jest-environment jsdom
  */
@@ -6,10 +6,13 @@
 import sinon from 'sinon';
 const sinonTest = require('sinon-test')(sinon);
 import * as React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { act } from 'react-dom/test-utils';
 import TestUtils from 'react-dom/test-utils';
-import renderer from 'react-test-renderer';
+import ReactTestRenderer from 'react-test-renderer';
 import FloatAnchor from '../src';
+
+global.IS_REACT_ACT_ENVIRONMENT = true;
 
 function makeRenderCounter() {
   let renderCount = 0;
@@ -33,21 +36,26 @@ test('mounts', sinonTest(function() {
   this.spy(window, 'removeEventListener');
   this.stub(window, 'requestAnimationFrame');
 
-  const mountPoint = document.createElement('div');
-  const root: FloatAnchor = (ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo</div>
-      }
-      float={
-        <div className="floatedThing">blah</div>
-      }
-      zIndex={1337}
-    />,
-    mountPoint
-  ): any);
+  const rootRFA = React.createRef<FloatAnchor>();
 
-  const divs = TestUtils.scryRenderedDOMComponentsWithTag(root, 'div');
+  const mountPoint = document.createElement('div');
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo</div>
+        }
+        float={
+          <div className="floatedThing">blah</div>
+        }
+        zIndex={1337}
+      />
+    );
+  });
+
+  const divs = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current, 'div');
 
   expect(divs.map(div => div.textContent)).toEqual(['foo', 'blah']);
   const foo = divs[0];
@@ -73,28 +81,33 @@ test('mounts', sinonTest(function() {
   if (!(floatContainer instanceof HTMLElement)) throw new Error('Failed to find container');
   expect(floatContainer.style.zIndex).toBe('1337');
 
-  ReactDOM.unmountComponentAtNode(mountPoint);
+  act(() => root.unmount());
 
   expect(document.querySelector('.floatedThing')).toBe(null);
   expect((floatParent: any).rfaAnchor).toBe(undefined);
 }));
 
 test('rfaAnchor updates if anchor element changes', () => {
-  const mountPoint = document.createElement('div');
-  const root: FloatAnchor = (ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo</div>
-      }
-      float={
-        <div className="floatedThing">blah</div>
-      }
-      zIndex={1337}
-    />,
-    mountPoint
-  ): any);
+  const rootRFA = React.createRef<FloatAnchor>();
 
-  const divs = TestUtils.scryRenderedDOMComponentsWithTag(root, 'div');
+  const mountPoint = document.createElement('div');
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo</div>
+        }
+        float={
+          <div className="floatedThing">blah</div>
+        }
+        zIndex={1337}
+      />
+    );
+  });
+
+  const divs = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current, 'div');
   expect(divs.map(div => div.textContent)).toEqual(['foo', 'blah']);
   const foo = divs[0];
 
@@ -113,20 +126,22 @@ test('rfaAnchor updates if anchor element changes', () => {
 
   expect((floatParent: any).rfaAnchor).toBe(foo);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <p ref={anchorRef}>bar</p>
-      }
-      float={
-        <div className="floatedThing">blah</div>
-      }
-      zIndex={1337}
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <p ref={anchorRef}>bar</p>
+        }
+        float={
+          <div className="floatedThing">blah</div>
+        }
+        zIndex={1337}
+      />
+    );
+  });
 
-  const ps = TestUtils.scryRenderedDOMComponentsWithTag(root, 'p');
+  const ps = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current, 'p');
   expect(ps.map(div => div.textContent)).toEqual(['bar']);
   const bar = ps[0];
 
@@ -141,40 +156,47 @@ test('rfaAnchor updates if anchor element changes', () => {
 
   expect((floatParent: any).rfaAnchor).toBe(bar);
 
-  ReactDOM.unmountComponentAtNode(mountPoint);
+  act(() => root.unmount());
 });
 
 test('float can be added and removed', async () => {
+  const rootRFA = React.createRef<FloatAnchor>();
+
   const mountPoint = document.createElement('div');
   const {getRenderCount, RenderCounter} = makeRenderCounter();
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo<RenderCounter /></div>
-      }
-      float={null}
-      zIndex={1337}
-    />,
-    mountPoint
-  );
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo<RenderCounter /></div>
+        }
+        float={null}
+        zIndex={1337}
+      />
+    );
+  });
   await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(1);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo<RenderCounter /></div>
-      }
-      float={
-        <div className="floatedThing">blah</div>
-      }
-      zIndex={1337}
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo<RenderCounter /></div>
+        }
+        float={
+          <div className="floatedThing">blah</div>
+        }
+        zIndex={1337}
+      />
+    );
+  });
   await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(2);
@@ -186,54 +208,67 @@ test('float can be added and removed', async () => {
 
   expect(document.contains(floatedThingParent)).toBe(true);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo<RenderCounter /></div>
-      }
-      float={null}
-      zIndex={1337}
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo<RenderCounter /></div>
+        }
+        float={null}
+        zIndex={1337}
+      />
+    );
+  });
   await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(3);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
   expect(document.contains(floatedThingParent)).toBe(false);
 
-  ReactDOM.unmountComponentAtNode(mountPoint);
+  act(() => root.unmount());
 });
 
 test('can add a (custom) class to the portal', () => {
-  TestUtils.renderIntoDocument(
-    <FloatAnchor
-      floatContainerClassName='my-floating-container'
-      anchor={anchorRef => <div ref={anchorRef}>foo</div>}
-      float={'abc'}
-      zIndex={1337}
-    />
-  );
+  const mountPoint = document.createElement('div');
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        floatContainerClassName='my-floating-container'
+        anchor={anchorRef => <div ref={anchorRef}>foo</div>}
+        float={'abc'}
+        zIndex={1337}
+      />
+    );
+  });
 
   expect(document.querySelector('.my-floating-container')).toBeTruthy();
+
+  act(() => root.unmount());
 });
 
 test('supports HTMLElement as anchor', () => {
+  const rootRFA = React.createRef<FloatAnchor>();
+
   const mountPoint = document.createElement('div');
   const anchor = document.createElement('div');
   const anchor2 = document.createElement('div');
   (document.body: any).appendChild(anchor);
   (document.body: any).appendChild(anchor2);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchor}
-      float={
-        <div className="floatedThing">blah</div>
-      }
-    />,
-    mountPoint
-  );
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchor}
+        float={
+          <div className="floatedThing">blah</div>
+        }
+      />
+    );
+  });
 
   const float = document.querySelector('.floatedThing');
   if (!float) throw new Error('should not happen');
@@ -252,15 +287,17 @@ test('supports HTMLElement as anchor', () => {
 
   expect((floatParent: any).rfaAnchor).toBe(anchor);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchor2}
-      float={
-        <div className="floatedThing">blah</div>
-      }
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchor2}
+        float={
+          <div className="floatedThing">blah</div>
+        }
+      />
+    );
+  });
 
   {
     const parentNodes = Array.from(FloatAnchor.parentNodes(float));
@@ -276,15 +313,17 @@ test('supports HTMLElement as anchor', () => {
   expect((floatParent: any).rfaAnchor).toBe(anchor2);
 
   // switch anchor from HTMLElement to a React element
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef => <div id="foo" ref={anchorRef}>foo</div>}
-      float={
-        <div className="floatedThing">blah</div>
-      }
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef => <div id="foo" ref={anchorRef}>foo</div>}
+        float={
+          <div className="floatedThing">blah</div>
+        }
+      />
+    );
+  });
 
   const foo = mountPoint.querySelector('#foo');
   if (!foo) throw new Error();
@@ -301,15 +340,17 @@ test('supports HTMLElement as anchor', () => {
   expect((floatParent: any).rfaAnchor).toBe(foo);
 
   // switch anchor back to HTMLElement
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchor}
-      float={
-        <div className="floatedThing">blah</div>
-      }
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchor}
+        float={
+          <div className="floatedThing">blah</div>
+        }
+      />
+    );
+  });
 
   {
     const parentNodes = Array.from(FloatAnchor.parentNodes(float));
@@ -324,74 +365,91 @@ test('supports HTMLElement as anchor', () => {
 
   expect((floatParent: any).rfaAnchor).toBe(anchor);
 
-  ReactDOM.unmountComponentAtNode(mountPoint);
+  act(() => root.unmount());
   anchor.remove();
   anchor2.remove();
 });
 
 test('supports parentElement', () => {
+  const mountPoint = document.createElement('div');
   const parentElement = document.createElement('div');
 
-  TestUtils.renderIntoDocument(
-    <FloatAnchor
-      anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
-      float={<div className="float">float</div>}
-      parentElement={parentElement}
-    />
-  );
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
+        float={<div className="float">float</div>}
+        parentElement={parentElement}
+      />
+    );
+  });
 
   expect(document.querySelector('.float')).toBe(null);
   expect(parentElement.querySelector('.float')).toBeTruthy();
+
+  act(() => root.unmount());
 });
 
 test('supports changing parentElement', () => {
+  const rootRFA = React.createRef<FloatAnchor>();
+
   const mountPoint = document.createElement('div');
   const parentElement1 = document.createElement('div');
   const parentElement2 = document.createElement('div');
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
-      float={<div className="float">float</div>}
-      parentElement={parentElement1}
-    />,
-    mountPoint
-  );
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
+        float={<div className="float">float</div>}
+        parentElement={parentElement1}
+      />
+    );
+  });
 
   expect(document.querySelector('.float')).toBe(null);
   expect(parentElement1.querySelector('.float')).toBeTruthy();
   expect(parentElement2.querySelector('.float')).toBe(null);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
-      float={<div className="float">float</div>}
-      parentElement={parentElement2}
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
+        float={<div className="float">float</div>}
+        parentElement={parentElement2}
+      />
+    );
+  });
 
   expect(document.querySelector('.float')).toBe(null);
   expect(parentElement1.querySelector('.float')).toBe(null);
   expect(parentElement2.querySelector('.float')).toBeTruthy();
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
-      float={<div className="float">float</div>}
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef => <div className="anchor" ref={anchorRef}>foo</div>}
+        float={<div className="float">float</div>}
+      />
+    );
+  });
 
   expect(document.querySelector('.float')).toBeTruthy();
   expect(parentElement1.querySelector('.float')).toBe(null);
   expect(parentElement2.querySelector('.float')).toBe(null);
+
+  act(() => root.unmount());
 });
 
 test('works with react-test-renderer without float', () => {
   // Doesn't work in react-test-renderer when float prop is non-null, partly
   // because https://github.com/facebook/react/issues/11565
-  const component = renderer.create(
+  const component = ReactTestRenderer.create(
     <FloatAnchor
       floatContainerClassName='my-floating-container'
       anchor={anchorRef => <div ref={anchorRef}>foo</div>}
@@ -401,6 +459,7 @@ test('works with react-test-renderer without float', () => {
   );
   let tree = component.toJSON();
   expect(tree).toMatchSnapshot();
+  component.unmount();
 });
 
 test('element is in DOM during componentDidMount', () => {
@@ -420,35 +479,48 @@ test('element is in DOM during componentDidMount', () => {
     }
   }
 
-  TestUtils.renderIntoDocument(
-    <FloatAnchor
-      floatContainerClassName="element-in-dom-test"
-      anchor={anchorRef => <div ref={anchorRef}>foo</div>}
-      float={<MountTester />}
-      zIndex={1337}
-    />
-  );
+  const mountPoint = document.createElement('div');
+
+
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        floatContainerClassName="element-in-dom-test"
+        anchor={anchorRef => <div ref={anchorRef}>foo</div>}
+        float={<MountTester />}
+        zIndex={1337}
+      />
+    );
+  });
 
   expect(wasInDomDuringMount).toBe(true);
+
+  act(() => root.unmount());
 });
 
 test('float choice callback works', async () => {
+  const rootRFA = React.createRef<FloatAnchor>();
+
   const mountPoint = document.createElement('div');
   const {getRenderCount, RenderCounter} = makeRenderCounter();
   const {getRenderCount: getFloatRenderCount, RenderCounter: FloatRenderCounter} = makeRenderCounter();
   const floatCb = jest.fn(choice => <div className="floatedThing">blah<FloatRenderCounter /></div>);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo<RenderCounter /></div>
-      }
-      float={floatCb}
-      zIndex={1337}
-    />,
-    mountPoint
-  );
-  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
+  const root = createRoot(mountPoint);
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo<RenderCounter /></div>
+        }
+        float={floatCb}
+        zIndex={1337}
+      />
+    );
+  });
+  await act(() => new Promise(requestAnimationFrame)); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(2);
   expect(getFloatRenderCount()).toBe(2);
@@ -460,16 +532,18 @@ test('float choice callback works', async () => {
     [{position: 'top', hAlign: 'center', vAlign: 'center'}]
   ]);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo<RenderCounter /></div>
-      }
-      float={floatCb}
-      zIndex={1337}
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo<RenderCounter /></div>
+        }
+        float={floatCb}
+        zIndex={1337}
+      />
+    );
+  });
   await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(3);
@@ -482,16 +556,18 @@ test('float choice callback works', async () => {
 
   const floatCb2 = jest.fn(choice => <div className="floatedThing">blah2<FloatRenderCounter /></div>);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo<RenderCounter /></div>
-      }
-      float={floatCb2}
-      zIndex={1337}
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo<RenderCounter /></div>
+        }
+        float={floatCb2}
+        zIndex={1337}
+      />
+    );
+  });
   await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(4);
@@ -504,16 +580,18 @@ test('float choice callback works', async () => {
     [{position: 'top', hAlign: 'center', vAlign: 'center'}]
   ]);
 
-  ReactDOM.render(
-    <FloatAnchor
-      anchor={anchorRef =>
-        <div ref={anchorRef}>foo<RenderCounter /></div>
-      }
-      float={null}
-      zIndex={1337}
-    />,
-    mountPoint
-  );
+  act(() => {
+    root.render(
+      <FloatAnchor
+        ref={rootRFA}
+        anchor={anchorRef =>
+          <div ref={anchorRef}>foo<RenderCounter /></div>
+        }
+        float={null}
+        zIndex={1337}
+      />
+    );
+  });
   await new Promise(requestAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(5);
@@ -523,5 +601,5 @@ test('float choice callback works', async () => {
   expect(floatCb.mock.calls.length).toEqual(3); // floatCb should not have been called again
   expect(floatCb2.mock.calls.length).toEqual(1); // floatCb2 should not have been called again
 
-  ReactDOM.unmountComponentAtNode(mountPoint);
+  act(() => root.unmount());
 });
