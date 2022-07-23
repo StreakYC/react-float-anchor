@@ -178,7 +178,7 @@ test('float can be added and removed', async () => {
       />
     );
   });
-  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
+  await act(() => new Promise(requestAnimationFrame)); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(1);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
@@ -197,7 +197,7 @@ test('float can be added and removed', async () => {
       />
     );
   });
-  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
+  await act(() => new Promise(requestAnimationFrame)); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(2);
   const floatedThing = document.querySelector('.floatedThing');
@@ -220,7 +220,7 @@ test('float can be added and removed', async () => {
       />
     );
   });
-  await new Promise(requestAnimationFrame); // wait for asynchronous reposition
+  await act(() => new Promise(requestAnimationFrame)); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(3);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
