@@ -1,10 +1,8 @@
-/* @flow */
 /* eslint-disable no-console */
 
-import * as React from 'react';
 import FloatAnchor from '../src';
 
-export default function Example(): React.Node {
+export default function Example() {
   return (
     <div className="main">
       <div className="intro">

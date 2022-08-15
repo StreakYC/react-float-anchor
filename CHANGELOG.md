@@ -1,3 +1,9 @@
+## 4.0.0 (in progress)
+
+### Breaking Changes
+* React v18 is now required.
+* If you are loading the module by using CommonJS `require` instead of ESM `import`, then the FloatAnchor component must now be accessed through the module's default property: `const FloatAnchor = require('react-float-anchor').default;`.
+
 ## 3.4.0 (2019-10-22)
 
 * Added support for passing an HTMLElement as the `anchor` prop.

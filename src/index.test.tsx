@@ -1,36 +1,44 @@
-/*
- * @flow
+/**
  * @jest-environment jsdom
  */
 
-import sinon from 'sinon';
-const sinonTest = require('sinon-test')(sinon);
+import * as sinon from 'sinon';
+import sinonTestFactory from 'sinon-test';
+const sinonTest = sinonTestFactory(sinon);
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react-dom/test-utils';
-import TestUtils from 'react-dom/test-utils';
-import ReactTestRenderer from 'react-test-renderer';
-import FloatAnchor from '../src';
+import * as TestUtils from 'react-dom/test-utils';
+import * as ReactTestRenderer from 'react-test-renderer';
+import FloatAnchor from '.';
 
-global.IS_REACT_ACT_ENVIRONMENT = true;
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
+function waitForAnimationFrame(): Promise<void> {
+  return new Promise(resolve => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+}
 
 function makeRenderCounter() {
   let renderCount = 0;
   function getRenderCount(): number {
     return renderCount;
   }
-  function RenderCounter(): React.Node {
+  function RenderCounter() {
     renderCount++;
-    return null;
+    return <></>;
   }
   return {getRenderCount, RenderCounter};
 }
 
 beforeEach(() => {
-  (document.body: any).textContent = '';
+  document.body.textContent = '';
 });
 
-test('mounts', sinonTest(function() {
+test('mounts', sinonTest(function(this: any) {
   // TODO test resize and scroll handlers
   this.spy(window, 'addEventListener');
   this.spy(window, 'removeEventListener');
@@ -55,7 +63,7 @@ test('mounts', sinonTest(function() {
     );
   });
 
-  const divs = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current, 'div');
+  const divs = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current!, 'div');
 
   expect(divs.map(div => div.textContent)).toEqual(['foo', 'blah']);
   const foo = divs[0];
@@ -75,7 +83,7 @@ test('mounts', sinonTest(function() {
   expect(parentNodes[3]).toBe(mountPoint);
   expect(parentNodes.length).toBe(4);
 
-  expect((floatParent: any).rfaAnchor).toBe(foo);
+  expect((floatParent as any).rfaAnchor).toBe(foo);
 
   const floatContainer = float.parentElement;
   if (!(floatContainer instanceof HTMLElement)) throw new Error('Failed to find container');
@@ -84,7 +92,7 @@ test('mounts', sinonTest(function() {
   act(() => root.unmount());
 
   expect(document.querySelector('.floatedThing')).toBe(null);
-  expect((floatParent: any).rfaAnchor).toBe(undefined);
+  expect((floatParent as any).rfaAnchor).toBe(undefined);
 }));
 
 test('rfaAnchor updates if anchor element changes', () => {
@@ -107,7 +115,7 @@ test('rfaAnchor updates if anchor element changes', () => {
     );
   });
 
-  const divs = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current, 'div');
+  const divs = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current!, 'div');
   expect(divs.map(div => div.textContent)).toEqual(['foo', 'blah']);
   const foo = divs[0];
 
@@ -124,7 +132,7 @@ test('rfaAnchor updates if anchor element changes', () => {
     expect(parentNodes.length).toBe(4);
   }
 
-  expect((floatParent: any).rfaAnchor).toBe(foo);
+  expect((floatParent as any).rfaAnchor).toBe(foo);
 
   act(() => {
     root.render(
@@ -141,7 +149,7 @@ test('rfaAnchor updates if anchor element changes', () => {
     );
   });
 
-  const ps = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current, 'p');
+  const ps = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current!, 'p');
   expect(ps.map(div => div.textContent)).toEqual(['bar']);
   const bar = ps[0];
 
@@ -154,7 +162,7 @@ test('rfaAnchor updates if anchor element changes', () => {
     expect(parentNodes.length).toBe(4);
   }
 
-  expect((floatParent: any).rfaAnchor).toBe(bar);
+  expect((floatParent as any).rfaAnchor).toBe(bar);
 
   act(() => root.unmount());
 });
@@ -178,7 +186,7 @@ test('float can be added and removed', async () => {
       />
     );
   });
-  await act(() => new Promise(requestAnimationFrame)); // wait for asynchronous reposition
+  await act(waitForAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(1);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
@@ -197,7 +205,7 @@ test('float can be added and removed', async () => {
       />
     );
   });
-  await act(() => new Promise(requestAnimationFrame)); // wait for asynchronous reposition
+  await act(waitForAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(2);
   const floatedThing = document.querySelector('.floatedThing');
@@ -220,7 +228,7 @@ test('float can be added and removed', async () => {
       />
     );
   });
-  await act(() => new Promise(requestAnimationFrame)); // wait for asynchronous reposition
+  await act(waitForAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(3);
   expect(document.querySelector('.floatedThing')).toBeFalsy();
@@ -254,8 +262,8 @@ test('supports HTMLElement as anchor', () => {
   const mountPoint = document.createElement('div');
   const anchor = document.createElement('div');
   const anchor2 = document.createElement('div');
-  (document.body: any).appendChild(anchor);
-  (document.body: any).appendChild(anchor2);
+  document.body.appendChild(anchor);
+  document.body.appendChild(anchor2);
 
   const root = createRoot(mountPoint);
   act(() => {
@@ -285,7 +293,7 @@ test('supports HTMLElement as anchor', () => {
     expect(parentNodes.length).toBe(6);
   }
 
-  expect((floatParent: any).rfaAnchor).toBe(anchor);
+  expect((floatParent as any).rfaAnchor).toBe(anchor);
 
   act(() => {
     root.render(
@@ -310,7 +318,7 @@ test('supports HTMLElement as anchor', () => {
     expect(parentNodes.length).toBe(6);
   }
 
-  expect((floatParent: any).rfaAnchor).toBe(anchor2);
+  expect((floatParent as any).rfaAnchor).toBe(anchor2);
 
   // switch anchor from HTMLElement to a React element
   act(() => {
@@ -337,7 +345,7 @@ test('supports HTMLElement as anchor', () => {
     expect(parentNodes.length).toBe(4);
   }
 
-  expect((floatParent: any).rfaAnchor).toBe(foo);
+  expect((floatParent as any).rfaAnchor).toBe(foo);
 
   // switch anchor back to HTMLElement
   act(() => {
@@ -363,7 +371,7 @@ test('supports HTMLElement as anchor', () => {
     expect(parentNodes.length).toBe(6);
   }
 
-  expect((floatParent: any).rfaAnchor).toBe(anchor);
+  expect((floatParent as any).rfaAnchor).toBe(anchor);
 
   act(() => root.unmount());
   anchor.remove();
@@ -457,7 +465,7 @@ test('works with react-test-renderer without float', () => {
       zIndex={1337}
     />
   );
-  let tree = component.toJSON();
+  const tree = component.toJSON();
   expect(tree).toMatchSnapshot();
   component.unmount();
 });
@@ -465,12 +473,12 @@ test('works with react-test-renderer without float', () => {
 test('element is in DOM during componentDidMount', () => {
   let wasInDomDuringMount = null;
 
-  class MountTester extends React.Component<*> {
-    _ref = React.createRef();
+  class MountTester extends React.Component {
+    private _ref = React.createRef<HTMLDivElement>();
 
     componentDidMount() {
       wasInDomDuringMount =
-        (document.body: any).contains(this._ref.current) &&
+        document.body.contains(this._ref.current) &&
         document.querySelector('.element-in-dom-test') != null;
     }
 
@@ -520,12 +528,12 @@ test('float choice callback works', async () => {
       />
     );
   });
-  await act(() => new Promise(requestAnimationFrame)); // wait for asynchronous reposition
+  await act(waitForAnimationFrame); // wait for asynchronous reposition
 
   expect(getRenderCount()).toBe(2);
   expect(getFloatRenderCount()).toBe(2);
   expect(document.querySelector('.floatedThing')).toBeTruthy();
-  expect((document.querySelector('.floatedThing'): any).textContent).toBe('blah');
+  expect(document.querySelector('.floatedThing')!.textContent).toBe('blah');
 
   expect(floatCb.mock.calls).toEqual([
     [null],
@@ -573,7 +581,7 @@ test('float choice callback works', async () => {
   expect(getRenderCount()).toBe(4);
   expect(getFloatRenderCount()).toBe(4);
   expect(document.querySelector('.floatedThing')).toBeTruthy();
-  expect((document.querySelector('.floatedThing'): any).textContent).toBe('blah2');
+  expect(document.querySelector('.floatedThing')!.textContent).toBe('blah2');
 
   expect(floatCb.mock.calls.length).toEqual(3); // floatCb should not have been called again
   expect(floatCb2.mock.calls).toEqual([

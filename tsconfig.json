@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
-    "noEmit": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "declaration": true,
     "strict": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "module": "commonjs",
-    "target": "ES2017",
-    "moduleResolution": "node"
+    "target": "ES2022",
+    "moduleResolution": "node",
+    "esModuleInterop": true
   }
 }

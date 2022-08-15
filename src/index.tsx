@@ -1,56 +1,55 @@
-/* @flow */
-
 import fromEventsWithOptions from './lib/fromEventsWithOptions';
 import LifecycleHelper from './LifecycleHelper';
-import Kefir from 'kefir';
+import * as Kefir from 'kefir';
 import kefirBus from 'kefir-bus';
 import type {Bus} from 'kefir-bus';
 import * as React from 'react';
+import {ReactNode, Ref} from 'react';
 import {createPortal} from 'react-dom';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import containByScreen from 'contain-by-screen';
 import type {Options, Choice} from 'contain-by-screen';
 import isEqual from 'lodash/isEqual';
 
-const requestAnimationFrame = global.requestAnimationFrame || (cb => Promise.resolve().then(cb));
+const requestAnimationFrame: (cb: () => void) => void = global.requestAnimationFrame || (cb => Promise.resolve().then(cb));
 
-type FloatAnchorContextType = {
+interface FloatAnchorContextType {
   // Emits an event after the component repositions, so the children can reposition themselves to match.
-  repositionEvents: Kefir.Observable<null>,
+  repositionEvents: Kefir.Observable<null, never>;
 
   // Signifies this component has a repositionAsync queued up. Children components should ignore repositionAsync
   // calls while this is true. Children should copy their parent whenever their parent sets theirs to true.
   // Components should clear this flag when they reposition unless they have a parent with it still set.
-  repositionAsyncQueued: boolean,
+  repositionAsyncQueued: boolean;
 
   // Emits every time repositionAsyncQueued becomes true.
-  repositionAsyncEvents: Kefir.Observable<null>
-};
+  repositionAsyncEvents: Kefir.Observable<null, never>;
+}
 
-type FloatAnchorOwnContextType = {
-  repositionEvents: Bus<null, any>,
-  repositionAsyncQueued: boolean,
-  repositionAsyncEvents: Bus<null, any>
-};
+interface FloatAnchorOwnContextType {
+  repositionEvents: Bus<null, never>;
+  repositionAsyncQueued: boolean;
+  repositionAsyncEvents: Bus<null, never>;
+}
 
 // Context is used so that when a FloatAnchor has reposition() called on it,
 // all of its descendant FloatAnchor elements reposition too.
-const FloatAnchorContext = React.createContext<?FloatAnchorContextType>(null);
+const FloatAnchorContext = React.createContext<FloatAnchorContextType | null>(null);
 
 export type {Options, Choice} from 'contain-by-screen';
 
-export type Props = {
-  anchor: ((anchorRef: React$Ref<any>) => React$Node) | HTMLElement;
-  parentElement?: ?HTMLElement;
-  float?: ?React$Node | ((choice: Choice | null) => React$Node);
-  options?: ?Options;
-  zIndex?: ?number|string;
-  floatContainerClassName?: ?string;
-};
-type State = {
+export interface Props {
+  anchor: ((anchorRef: Ref<any>) => ReactNode) | HTMLElement;
+  parentElement?: HTMLElement;
+  float?: ReactNode | ((choice: Choice | null) => ReactNode) | null;
+  options?: Options | null;
+  zIndex?: number|string|null;
+  floatContainerClassName?: string|null;
+}
+interface State {
   choice: Choice | null;
-  floatNode: ?React$Node;
-};
+  floatNode: ReactNode | null;
+}
 export default class FloatAnchor extends React.Component<Props, State> {
   static propTypes = {
     anchor: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
@@ -68,39 +67,39 @@ export default class FloatAnchor extends React.Component<Props, State> {
     floatNode: null
   };
 
-  _portalEl: ?HTMLElement;
-  _portalRemoval: Bus<null> = kefirBus();
-  _unmount: Bus<null> = kefirBus();
-  _childContext: FloatAnchorOwnContextType = {
-    repositionEvents: (kefirBus(): Bus<null>),
+  private _portalEl: HTMLElement | undefined;
+  private _portalRemoval = kefirBus<null, never>();
+  private _unmount = kefirBus<null, never>();
+  private _childContext: FloatAnchorOwnContextType = {
+    repositionEvents: kefirBus<null, never>(),
     repositionAsyncQueued: false,
-    repositionAsyncEvents: (kefirBus(): Bus<null>)
+    repositionAsyncEvents: kefirBus<null, never>()
   };
 
-  static *parentNodes(node: Node): Iterator<Node> {
+  static *parentNodes(node: Node): IterableIterator<Node> {
     do {
-      yield (node: Node);
-    } while ((node = (node: any).rfaAnchor || (node: any).parentNode));
+      yield node;
+    } while ((node = (node as any).rfaAnchor || (node as any).parentNode));
   }
 
   // This property is only used in the case that props.anchor is not an HTMLElement
-  _anchorRef: ?HTMLElement = null;
+  private _anchorRef: HTMLElement | null = null;
 
-  _setAnchorRef: (anchorRef: ?HTMLElement) => void = (anchorRef: ?HTMLElement) => {
+  private _setAnchorRef = (anchorRef: HTMLElement | null) => {
     this._anchorRef = anchorRef;
 
     const portalEl = this._portalEl;
     if (portalEl) {
       // rfaAnchor is also set in _mountPortal. This line is necessary in the case that
       // the anchorRef is updated.
-      (portalEl: any).rfaAnchor = anchorRef ? anchorRef : undefined;
+      (portalEl as any).rfaAnchor = anchorRef ? anchorRef : undefined;
     }
   };
-  _getAnchorRef(): ?HTMLElement {
+  private _getAnchorRef(): HTMLElement | null {
     return typeof this.props.anchor === 'function' ? this._anchorRef : this.props.anchor;
   }
 
-  _getOrCreatePortalEl(): HTMLElement {
+  private _getOrCreatePortalEl(): HTMLElement {
     const portalEl_firstCheck = this._portalEl;
     if (portalEl_firstCheck) {
       return portalEl_firstCheck;
@@ -115,7 +114,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const parentCtx: ?FloatAnchorContextType = this.context;
+    const parentCtx = this.context as FloatAnchorContextType | null;
     if (parentCtx) {
       parentCtx.repositionEvents
         .takeUntilBy(this._unmount)
@@ -142,7 +141,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
     }
   }
 
-  static getDerivedStateFromProps(props: Props, state: State): $Shape<State> | null {
+  static getDerivedStateFromProps(props: Props, state: State): Partial<State> | null {
     return {
       floatNode: typeof props.float === 'function' ? props.float(state.choice) : props.float
     };
@@ -186,7 +185,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
 
         // If anchor is an HTMLElement and has changed, then update portalEl.rfaAnchor
         if (typeof this.props.anchor !== 'function' && prevProps.anchor !== this.props.anchor) {
-          (portalEl: any).rfaAnchor = this.props.anchor;
+          (portalEl as any).rfaAnchor = this.props.anchor;
           this.repositionAsync();
         } else if (
           // If this re-render happened because of a change in position choice, don't reposition again now.
@@ -223,7 +222,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
     requestAnimationFrame(() => {
       // If our parent still has a repositionAsync queued up, then don't fire.
       // The parent may have queued up a repositionAsync in the time since this repositionAsync() was called.
-      const parentCtx: ?FloatAnchorContextType = this.context;
+      const parentCtx = this.context as FloatAnchorContextType | null;
       if (!parentCtx || !parentCtx.repositionAsyncQueued) {
         // Make sure we still have a repositionAsync queued up. It could be that reposition() has been called
         // in the time since repositionAsync().
@@ -237,7 +236,7 @@ export default class FloatAnchor extends React.Component<Props, State> {
 
   reposition() {
     // Only clear our repositionAsyncQueued flag if we're not reflecting our parent's true value.
-    const parentCtx: ?FloatAnchorContextType = this.context;
+    const parentCtx = this.context as FloatAnchorContextType | null;
     if (!parentCtx || !parentCtx.repositionAsyncQueued) {
       this._childContext.repositionAsyncQueued = false;
     }
@@ -256,18 +255,16 @@ export default class FloatAnchor extends React.Component<Props, State> {
   }
 
   _mountPortalEl: () => void = () => {
-    const portalEl = this._portalEl;
-    /*:: if (!portalEl) throw new Error(); */
+    const portalEl = this._portalEl!;
     if (portalEl.parentElement) {
       throw new Error('Should not happen: portalEl already in page');
     }
 
     const anchorRef = this._getAnchorRef();
     if (!anchorRef) throw new Error('ReactFloatAnchor missing anchorRef element');
-    (portalEl: any).rfaAnchor = anchorRef;
+    (portalEl as any).rfaAnchor = anchorRef;
 
-    const target = this.props.parentElement || document.body || document.documentElement;
-    /*:: if (!target) throw new Error(); */
+    const target = (this.props.parentElement || document.body || document.documentElement)!;
     target.appendChild(portalEl);
 
     Kefir.merge([
@@ -285,27 +282,26 @@ export default class FloatAnchor extends React.Component<Props, State> {
         this.repositionAsync();
       })
       .onEnd(() => {
-        (portalEl: any).rfaAnchor = undefined;
-        /*:: if (!portalEl.parentElement) throw new Error(); */
-        portalEl.parentElement.removeChild(portalEl);
+        (portalEl as any).rfaAnchor = undefined;
+        portalEl.parentElement!.removeChild(portalEl);
       });
   };
 
-  render(): React.Node {
+  render() {
     const {anchor} = this.props;
     const float = this.state.floatNode;
     let floatPortal = null;
     if (float != null) {
       const portalEl = this._getOrCreatePortalEl();
       floatPortal = (
-        <FloatAnchorContext.Provider value={((this._childContext: any): FloatAnchorContextType)}>
+        <FloatAnchorContext.Provider value={this._childContext as any as FloatAnchorContextType}>
           <LifecycleHelper onMount={this._mountPortalEl} />
           {createPortal(float, portalEl)}
         </FloatAnchorContext.Provider>
       );
     }
 
-    const anchorElement = typeof anchor === 'function' ? anchor((this._setAnchorRef: any)) : null;
+    const anchorElement = typeof anchor === 'function' ? anchor((this._setAnchorRef as any)) : null;
 
     return (
       <>

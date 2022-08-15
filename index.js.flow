@@ -1,0 +1,20 @@
+/* @flow */
+import * as React from 'react';
+
+import type {Options, Choice} from 'contain-by-screen';
+
+export type {Options, Choice} from 'contain-by-screen';
+
+export type Props = {
+  anchor: ((anchorRef: React.Ref<any>) => React.Node) | HTMLElement;
+  float?: React.Node | ((choice: Choice | null) => React.Node) | null | void;
+  options?: Options | null | void;
+  zIndex?: number | string | null | void;
+  floatContainerClassName?: string | null | void;
+  parentElement?: HTMLElement;
+};
+declare export default class FloatAnchor extends React.Component<Props> {
+  static parentNodes(node: Node): Iterator<Node>;
+  repositionAsync(): void;
+  reposition(): void;
+}

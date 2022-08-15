@@ -1,13 +1,11 @@
-/* @flow */
 /*eslint no-console: "off" */
 
-import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import Example from './Example';
 
-const onReady = new Promise(resolve => {
+const onReady = new Promise<unknown>(resolve => {
   if (document.readyState === 'complete') {
-    resolve();
+    resolve(undefined);
   } else {
     document.addEventListener('DOMContentLoaded', resolve, false);
     window.addEventListener('load', resolve, false);
