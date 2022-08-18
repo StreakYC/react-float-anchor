@@ -14,6 +14,13 @@ import FloatAnchor from ".";
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
+/** Exists purely because some React TestUtils functions expect a class component. */
+class TestRoot extends React.Component<{ children: React.ReactNode }> {
+  render() {
+    return this.props.children;
+  }
+}
+
 function waitForAnimationFrame(): Promise<void> {
   return new Promise((resolve) => {
     requestAnimationFrame(() => {
@@ -34,8 +41,10 @@ function makeRenderCounter() {
   return { getRenderCount, RenderCounter };
 }
 
-beforeEach(() => {
-  document.body.textContent = "";
+afterEach(() => {
+  if (document.body.childNodes.length) {
+    throw new Error("elements left in document.body");
+  }
 });
 
 test(
@@ -46,23 +55,24 @@ test(
     this.spy(window, "removeEventListener");
     this.stub(window, "requestAnimationFrame");
 
-    const rootRFA = React.createRef<FloatAnchor>();
+    const testRootRef = React.createRef<TestRoot>();
 
     const mountPoint = document.createElement("div");
     const root = createRoot(mountPoint);
     act(() => {
       root.render(
-        <FloatAnchor
-          ref={rootRFA}
-          anchor={(anchorRef) => <div ref={anchorRef}>foo</div>}
-          float={<div className="floatedThing">blah</div>}
-          zIndex={1337}
-        />
+        <TestRoot ref={testRootRef}>
+          <FloatAnchor
+            anchor={(anchorRef) => <div ref={anchorRef}>foo</div>}
+            float={<div className="floatedThing">blah</div>}
+            zIndex={1337}
+          />
+        </TestRoot>
       );
     });
 
     const divs = TestUtils.scryRenderedDOMComponentsWithTag(
-      rootRFA.current!,
+      testRootRef.current!,
       "div"
     );
 
@@ -99,23 +109,23 @@ test(
 );
 
 test("rfaAnchor updates if anchor element changes", () => {
-  const rootRFA = React.createRef<FloatAnchor>();
-
+  const testRootRef = React.createRef<TestRoot>();
   const mountPoint = document.createElement("div");
   const root = createRoot(mountPoint);
   act(() => {
     root.render(
-      <FloatAnchor
-        ref={rootRFA}
-        anchor={(anchorRef) => <div ref={anchorRef}>foo</div>}
-        float={<div className="floatedThing">blah</div>}
-        zIndex={1337}
-      />
+      <TestRoot ref={testRootRef}>
+        <FloatAnchor
+          anchor={(anchorRef) => <div ref={anchorRef}>foo</div>}
+          float={<div className="floatedThing">blah</div>}
+          zIndex={1337}
+        />
+      </TestRoot>
     );
   });
 
   const divs = TestUtils.scryRenderedDOMComponentsWithTag(
-    rootRFA.current!,
+    testRootRef.current!,
     "div"
   );
   expect(divs.map((div) => div.textContent)).toEqual(["foo", "blah"]);
@@ -138,16 +148,20 @@ test("rfaAnchor updates if anchor element changes", () => {
 
   act(() => {
     root.render(
-      <FloatAnchor
-        ref={rootRFA}
-        anchor={(anchorRef) => <p ref={anchorRef}>bar</p>}
-        float={<div className="floatedThing">blah</div>}
-        zIndex={1337}
-      />
+      <TestRoot ref={testRootRef}>
+        <FloatAnchor
+          anchor={(anchorRef) => <p ref={anchorRef}>bar</p>}
+          float={<div className="floatedThing">blah</div>}
+          zIndex={1337}
+        />
+      </TestRoot>
     );
   });
 
-  const ps = TestUtils.scryRenderedDOMComponentsWithTag(rootRFA.current!, "p");
+  const ps = TestUtils.scryRenderedDOMComponentsWithTag(
+    testRootRef.current!,
+    "p"
+  );
   expect(ps.map((div) => div.textContent)).toEqual(["bar"]);
   const bar = ps[0];
 
@@ -166,25 +180,25 @@ test("rfaAnchor updates if anchor element changes", () => {
 });
 
 test("float can be added and removed", async () => {
-  const rootRFA = React.createRef<FloatAnchor>();
+  const testRootRef = React.createRef<TestRoot>();
 
-  const mountPoint = document.createElement("div");
   const { getRenderCount, RenderCounter } = makeRenderCounter();
 
-  const root = createRoot(mountPoint);
+  const root = createRoot(document.createElement("div"));
   act(() => {
     root.render(
-      <FloatAnchor
-        ref={rootRFA}
-        anchor={(anchorRef) => (
-          <div ref={anchorRef}>
-            foo
-            <RenderCounter />
-          </div>
-        )}
-        float={null}
-        zIndex={1337}
-      />
+      <TestRoot ref={testRootRef}>
+        <FloatAnchor
+          anchor={(anchorRef) => (
+            <div ref={anchorRef}>
+              foo
+              <RenderCounter />
+            </div>
+          )}
+          float={null}
+          zIndex={1337}
+        />
+      </TestRoot>
     );
   });
   await act(waitForAnimationFrame); // wait for asynchronous reposition
@@ -194,17 +208,18 @@ test("float can be added and removed", async () => {
 
   act(() => {
     root.render(
-      <FloatAnchor
-        ref={rootRFA}
-        anchor={(anchorRef) => (
-          <div ref={anchorRef}>
-            foo
-            <RenderCounter />
-          </div>
-        )}
-        float={<div className="floatedThing">blah</div>}
-        zIndex={1337}
-      />
+      <TestRoot ref={testRootRef}>
+        <FloatAnchor
+          anchor={(anchorRef) => (
+            <div ref={anchorRef}>
+              foo
+              <RenderCounter />
+            </div>
+          )}
+          float={<div className="floatedThing">blah</div>}
+          zIndex={1337}
+        />
+      </TestRoot>
     );
   });
   await act(waitForAnimationFrame); // wait for asynchronous reposition
@@ -220,17 +235,18 @@ test("float can be added and removed", async () => {
 
   act(() => {
     root.render(
-      <FloatAnchor
-        ref={rootRFA}
-        anchor={(anchorRef) => (
-          <div ref={anchorRef}>
-            foo
-            <RenderCounter />
-          </div>
-        )}
-        float={null}
-        zIndex={1337}
-      />
+      <TestRoot ref={testRootRef}>
+        <FloatAnchor
+          anchor={(anchorRef) => (
+            <div ref={anchorRef}>
+              foo
+              <RenderCounter />
+            </div>
+          )}
+          float={null}
+          zIndex={1337}
+        />
+      </TestRoot>
     );
   });
   await act(waitForAnimationFrame); // wait for asynchronous reposition
@@ -243,8 +259,7 @@ test("float can be added and removed", async () => {
 });
 
 test("can add a (custom) class to the portal", () => {
-  const mountPoint = document.createElement("div");
-  const root = createRoot(mountPoint);
+  const root = createRoot(document.createElement("div"));
   act(() => {
     root.render(
       <FloatAnchor
@@ -262,8 +277,6 @@ test("can add a (custom) class to the portal", () => {
 });
 
 test("supports HTMLElement as anchor", () => {
-  const rootRFA = React.createRef<FloatAnchor>();
-
   const mountPoint = document.createElement("div");
   const anchor = document.createElement("div");
   const anchor2 = document.createElement("div");
@@ -274,7 +287,6 @@ test("supports HTMLElement as anchor", () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={anchor}
         float={<div className="floatedThing">blah</div>}
       />
@@ -301,7 +313,6 @@ test("supports HTMLElement as anchor", () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={anchor2}
         float={<div className="floatedThing">blah</div>}
       />
@@ -325,7 +336,6 @@ test("supports HTMLElement as anchor", () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={(anchorRef) => (
           <div id="foo" ref={anchorRef}>
             foo
@@ -354,7 +364,6 @@ test("supports HTMLElement as anchor", () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={anchor}
         float={<div className="floatedThing">blah</div>}
       />
@@ -380,10 +389,9 @@ test("supports HTMLElement as anchor", () => {
 });
 
 test("supports parentElement", () => {
-  const mountPoint = document.createElement("div");
   const parentElement = document.createElement("div");
 
-  const root = createRoot(mountPoint);
+  const root = createRoot(document.createElement("div"));
   act(() => {
     root.render(
       <FloatAnchor
@@ -405,17 +413,13 @@ test("supports parentElement", () => {
 });
 
 test("supports changing parentElement", () => {
-  const rootRFA = React.createRef<FloatAnchor>();
-
-  const mountPoint = document.createElement("div");
   const parentElement1 = document.createElement("div");
   const parentElement2 = document.createElement("div");
 
-  const root = createRoot(mountPoint);
+  const root = createRoot(document.createElement("div"));
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={(anchorRef) => (
           <div className="anchor" ref={anchorRef}>
             foo
@@ -434,7 +438,6 @@ test("supports changing parentElement", () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={(anchorRef) => (
           <div className="anchor" ref={anchorRef}>
             foo
@@ -453,7 +456,6 @@ test("supports changing parentElement", () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={(anchorRef) => (
           <div className="anchor" ref={anchorRef}>
             foo
@@ -504,9 +506,7 @@ test("element is in DOM during componentDidMount", () => {
     }
   }
 
-  const mountPoint = document.createElement("div");
-
-  const root = createRoot(mountPoint);
+  const root = createRoot(document.createElement("div"));
   act(() => {
     root.render(
       <FloatAnchor
@@ -524,8 +524,6 @@ test("element is in DOM during componentDidMount", () => {
 });
 
 test("float choice callback works", async () => {
-  const rootRFA = React.createRef<FloatAnchor>();
-
   const mountPoint = document.createElement("div");
   const { getRenderCount, RenderCounter } = makeRenderCounter();
   const {
@@ -543,7 +541,6 @@ test("float choice callback works", async () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={(anchorRef) => (
           <div ref={anchorRef}>
             foo
@@ -570,7 +567,6 @@ test("float choice callback works", async () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={(anchorRef) => (
           <div ref={anchorRef}>
             foo
@@ -602,7 +598,6 @@ test("float choice callback works", async () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={(anchorRef) => (
           <div ref={anchorRef}>
             foo
@@ -629,7 +624,6 @@ test("float choice callback works", async () => {
   act(() => {
     root.render(
       <FloatAnchor
-        ref={rootRFA}
         anchor={(anchorRef) => (
           <div ref={anchorRef}>
             foo
