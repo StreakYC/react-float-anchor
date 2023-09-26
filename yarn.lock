@@ -2186,10 +2186,10 @@ constants-browserify@~1.0.0:
   resolved "https://registry.yarnpkg.com/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
   integrity sha512-xFxOwqIzR/e1k1gLiWEophSCMqXcwVHIH7akf7b/vxcUeGunlj3hvZaaqxwHsTgn+IndtkQJgSztIDWeumWJDQ==
 
-contain-by-screen@^1.0.4:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/contain-by-screen/-/contain-by-screen-1.3.0.tgz#990fe49d01088b24dca4e237cfb03d52ecf83af6"
-  integrity sha512-s7xejuwIARvBM8cDSFft4xclXFhmnzao/b0dDXL1i5C0GWi4BGyxaYQBtUJI/EZrVCtD8sM8nLeSaJYJlj/1gw==
+contain-by-screen@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/contain-by-screen/-/contain-by-screen-2.0.0.tgz#407db8dca7e8842d443c413dc769767ddc7f1fc5"
+  integrity sha512-7szhQr/00FG7Iq0HkZAt3LmfM0JK2CBSV2vH/Ta+PqcHMDApaXHRU+SGHNq/cw+2lsw+MgA45BL+yhgtLsfHgw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     envify "^4.1.0"

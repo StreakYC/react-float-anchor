@@ -63,7 +63,7 @@ following props:
  contain-by-screen.
 * `options` is an optional object of options to control how the float element's
  container is aligned to the anchor element. The options are the same as those
- supported by [contain-by-screen (version ^1.0)](https://github.com/Macil/contain-by-screen#readme).
+ supported by [contain-by-screen (version ^2.0)](https://github.com/Macil/contain-by-screen#readme).
 * `zIndex` is an optional number controlling the z-index CSS property of the
  float element's container.
 * `floatContainerClassName` is an optional string specifying a CSS class to

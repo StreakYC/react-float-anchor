@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "contain-by-screen": "^1.0.4",
+    "contain-by-screen": "^2.0.0",
     "event-listener-with-options": "^1.0.2",
     "kefir": "^3.5.1",
     "kefir-bus": "^2.2.0",
