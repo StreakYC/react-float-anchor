@@ -1,3 +1,7 @@
+## 3.4.1 (2023-09-29)
+
+* Upgraded to contain-by-screen 2.1.0 to fix issues with large menus not being fit on screen.
+
 ## 3.4.0 (2019-10-22)
 
 * Added support for passing an HTMLElement as the `anchor` prop.
