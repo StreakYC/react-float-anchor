@@ -9,11 +9,7 @@ import * as React from 'react';
 import {createPortal} from 'react-dom';
 import PropTypes from 'prop-types';
 import {containByScreen} from 'contain-by-screen';
-// contain-by-screen dropped Flow support.
-// Doing a workaround until we move this project over to Typescript.
-// import type {Options, Choice} from 'contain-by-screen';
-type Options = any;
-type Choice = any;
+import type {Options, Choice} from 'contain-by-screen';
 import isEqual from 'lodash/isEqual';
 
 const requestAnimationFrame = global.requestAnimationFrame || (cb => Promise.resolve().then(cb));
